@@ -1,0 +1,257 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>什么是微服务？ | JavaHub</title><meta name="author" content="Jiang Dequan"><meta name="copyright" content="Jiang Dequan"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="贯穿微服务的核心思想是：当某些类型的应用程序被拆分为可以协同工作的、较小的、可组合的模块时，它们变得更加容易构建和维护。每个组件都是持续开发和单独维护的，这样整个应用程序就是由其它组件组合而成。这与传统的“单体”应用形成鲜明地对比，后者将所有的功能全部都融合在一个应用当中。"><meta property="og:type" content="article"><meta property="og:title" content="什么是微服务？"><meta property="og:url" content="https://jiangdequan.github.io/posts/8b0d9e7/index.html"><meta property="og:site_name" content="JavaHub"><meta property="og:description" content="贯穿微服务的核心思想是：当某些类型的应用程序被拆分为可以协同工作的、较小的、可组合的模块时，它们变得更加容易构建和维护。每个组件都是持续开发和单独维护的，这样整个应用程序就是由其它组件组合而成。这与传统的“单体”应用形成鲜明地对比，后者将所有的功能全部都融合在一个应用当中。"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg"><meta property="article:published_time" content="2018-10-31T10:19:18.000Z"><meta property="article:modified_time" content="2025-03-03T10:00:07.560Z"><meta property="article:author" content="Jiang Dequan"><meta property="article:tag" content="微服务"><meta property="article:tag" content="开源"><meta property="article:tag" content="容器"><meta property="article:tag" content="SOA"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "什么是微服务？",
+  "url": "https://jiangdequan.github.io/posts/8b0d9e7/",
+  "image": "https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg",
+  "datePublished": "2018-10-31T10:19:18.000Z",
+  "dateModified": "2025-03-03T10:00:07.560Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Jiang Dequan",
+      "url": "https://jiangdequan.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://s2.loli.net/2023/12/29/Nfp8D9oMJsBWRrG.png"><link rel="canonical" href="https://jiangdequan.github.io/posts/8b0d9e7/index.html"><link rel="preconnect" href="//cdnjs.cloudflare.com"><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""><link rel="preconnect" href="//hm.baidu.com"><link rel="preconnect" href="//static.cloudflareinsights.com"><link rel="preconnect" href="//www.clarity.ms"><link rel="preconnect" href="//busuanzi.ibruce.info"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/node-snackbar/0.1.16/snackbar.min.css" media="print" onload='this.media="all"'><script>(() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()</script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?bc0445e7c42c61f5dc373e69ac7ee59e";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+btf.addGlobalFn('pjaxComplete', () => {
+  _hmt.push(['_trackPageview',window.location.pathname])
+}, 'baidu_analytics')</script><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-127646245-1"></script><script>window.dataLayer = window.dataLayer || []
+function gtag(){dataLayer.push(arguments)}
+gtag('js', new Date())
+gtag('config', 'UA-127646245-1')
+btf.addGlobalFn('pjaxComplete', () => {
+  gtag('config', 'UA-127646245-1', {'page_path': window.location.pathname})
+}, 'google_analytics')</script><script defer="defer" data-pjax="data-pjax" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{&quot;token&quot;: &quot;66d74019765e485785de38de87092572&quot;}"></script><script>!function(t,e,n,a,c,r,s){t[n]=t[n]||function(){(t[n].q=t[n].q||[]).push(arguments)},(r=e.createElement(a)).async=1,r.src="https://www.clarity.ms/tag/kda872w6hw",(s=e.getElementsByTagName(a)[0]).parentNode.insertBefore(r,s)}(window,document,"clarity","script")</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Jiang Dequan","link":"链接: ","source":"来源: JavaHub","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'null',
+  Snackbar: {"chs_to_cht":"已切换为繁体中文","cht_to_chs":"已切换为简体中文","day_to_night":"已切换为深色模式","night_to_day":"已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"bottom-left"},
+  infinitegrid: {
+    js: 'https://cdnjs.cloudflare.com/ajax/libs/egjs-infinitegrid/4.12.0/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE={title:"什么是微服务？",isHighlightShrink:!1,isToc:!0,pageType:"post"}</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg" onerror='this.onerror=null,this.src="/img/friend_404.gif"' alt="avatar"></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">11</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">39</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 影视</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 收藏</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background:linear-gradient(20deg,#0062be,#925696,#cc426e,#fb0347)"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">JavaHub</span></a><a class="nav-page-title" href="/"><span class="site-name">什么是微服务？</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span> 返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 影视</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 收藏</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">什么是微服务？</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2018-10-31T10:19:18.000Z" title="发表于 2018年10月31日 18:19:18">2018年10月31日</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-03-03T10:00:07.560Z" title="更新于 2025年03月03日 18:00:07">2025年03月03日</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%9E%B6%E6%9E%84%E7%AF%87/">架构篇</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">1845</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>5分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>贯穿微服务的核心思想是：当某些类型的应用程序被拆分为可以协同工作的、较小的、可组合的模块时，它们变得更加容易构建和维护。每个组件都是持续开发和单独维护的，这样整个应用程序就是由其它组件组合而成。这与传统的“单体”应用形成鲜明地对比，后者将所有的功能全部都融合在一个应用当中。</p><span id="more"></span><p>用一系列模块化的组件来构建应用更易于理解和测试，而且最重要的是在应用的整个生命周期中更易于维护。它使得公司或者组织能够实现更高的灵活性，并能够大大缩短开发、测试、投产等所需的时间。事实证明，这种方法更加出色，特别是对于由地理和文化多样化的开发人员团队开发的大型企业应用。</p><p>微服务还有其他一些好处：</p><ul><li>__开发人员独立性__：小型团队并行工作，并且可以比大型团队更快地迭代。</li><li>__隔离和弹性__：如果一个组件死了，你可以旋转另一个组件，然后应用程序的其余部分继续运行。</li><li>__可扩展性__：较小的组件占用较少的资源，并且可以进行扩展以仅满足该组件不断增长的需求。</li><li>__生命周期自动化__：单个组件更易于适应连续交付管道和复杂的部署方案，而单体应用则无法实现。</li><li>__与业务的关系__：微服务架构在业务领域边界上分开，增加了整个组织的独立性和理解。</li></ul><p>微服务的通用定义通常依赖于提供API端点的每个微服务，通常但不总是无状态REST API，可以通过HTTP（S）访问，就像标准网页一样。这种访问微服务的方法使开发人员可以轻松地使用它们，因为它们只需要大多数开发人员已经熟悉的开发工具和方法。</p><h2 id="微服务是一个新概念吗？"><a href="#微服务是一个新概念吗？" class="headerlink" title="微服务是一个新概念吗？"></a>微服务是一个新概念吗？</h2><p>将应用拆分成若干更小组件的思想并不新鲜了。已经有其他编程的范例使用了和微服务相同的理念，例如面向服务的架构（SOA）。然而，随着前沿科技的进步加上对集成的“数字体验”的期望越来越高，已经产生了用于满足现代商业应用需求的新型开发工具和技术。</p><p>微服务不仅取决于为支持这一概念而设立的技术，还取决于具有文化，技术诀窍和结构的组织，以便开发团队能够采用此模型。微服务是IT部门向DevOps文化转变的一部分，其中开发和运营团队紧密合作，在其生命周期内支持应用程序，并经历快速甚至连续的发布周期，而不是更传统的长周期。</p><h2 id="为什么开源对于微服务很重要？"><a href="#为什么开源对于微服务很重要？" class="headerlink" title="为什么开源对于微服务很重要？"></a>为什么开源对于微服务很重要？</h2><p>当您从一开始就将应用程序设计为模块化和可组合时，它允许您在许多地方使用插入式组件，在过去您可能需要一些专有的解决方案，这可能是因为组件的证书限制或特殊使用要求。许多应用程序组件都能够找到现成的开源工具，并且有无数的开源项目可以实现微服务架构的各种不同的要求，例如身份验证，服务发现，日志记录和监视，负载平衡，扩展等等。</p><p>专注于微服务可以使开发人员更加容易的为您的应用提供可选择的接口。当所有服务都是API时，应用组件之间的通信就变得标准化。所有的组件都必须通过这些标准的API来使用该应用和数据进行权限校验和通信。这样就使得组织内外部的开发人员更加容易地创造新的方式来使用应用数据和服务。</p><h2 id="容器技术从何而来？"><a href="#容器技术从何而来？" class="headerlink" title="容器技术从何而来？"></a>容器技术从何而来？</h2><p>轻量级操作系统容器的现代化概念是在21世纪早期作为 FreeBSD 项目的一部分而被引入的。Docker 为创建和共享容器映像提供了改进的用户体验，因此从 2013 年开始被大量采用。容器非常适合微服务，符合轻量级和灵活组件的需求，同时也易于管理和动态替换。不同于虚拟机，容器被设计为运行容器所需的最小组件，而不是将多个功能打包到同一虚拟或物理机器中。Docker 和类似工具提供的易开发性有助于快速开发和测试服务。</p><p>当然，容器只是一种工具，微服务架构只是一个概念。在不使用容器的情况下，完全可以构建一个微服务应用程序，就像在容器内构建更传统的应用程序一样。也许利用容器来组织这些功能，会显得更加合理。</p><h2 id="如何协调微服务？"><a href="#如何协调微服务？" class="headerlink" title="如何协调微服务？"></a>如何协调微服务？</h2><p>为了在生产中运行微服务应用，您需要能够监控、管理和扩展不同的组成部分。到目前为止，已经有许多不同的工具可以帮助你实现这一目标。就容器而言，诸如 <a target="_blank" rel="noopener" href="http://kubernetes.io/">Kubernetes</a> 类似的开源工具，将有可能成为你解决方案中的一部分。或者，对于应用中非容器的部分，可以使用其他工具来管理这些组件：例如，在 <a target="_blank" rel="noopener" href="https://opensource.com/resources/what-is-openstack">OpenStack</a> 云上，你可以使用 Heat 来管理应用程序组件。</p><p>另一个选择是使用平台即服务（PaaS，Platform as a Service）工具，它允许开发人员专注于编写代码，通过抽象一些底层管理技术，并允许他们轻松地为应用程序的某些部分选择现成的开源组件。像数据库存储引擎，日志记录服务，持续集成服务器，Web 服务器或其他组件。一些 PaaS 系统（如OpenShift）直接使用 Docker 和 Kubernetes 等上游项目来管理应用程序组件，而其他一些系统则尝试自行重新实现管理工具。</p><h2 id="现有应用程序怎么样？"><a href="#现有应用程序怎么样？" class="headerlink" title="现有应用程序怎么样？"></a>现有应用程序怎么样？</h2><p>虽然使用微服务可能是公司未来 IT 战略的重要组成部分，但肯定有许多应用程序不符合这种模式，也不可能在一夜之间重新构建这些应用程序以满足微服务这种新架构风格。迁移到微服务架构存在文化和技术成本，但幸运的是，微服务和传统应用程序可以在相同的环境中协同工作，前提是公司具有可靠的双模 IT 策略。</p><h2 id="在哪里可以了解更多？"><a href="#在哪里可以了解更多？" class="headerlink" title="在哪里可以了解更多？"></a>在哪里可以了解更多？</h2><ul><li><a target="_blank" rel="noopener" href="https://opensource.com/business/14/12/containers-microservices-and-orchestrating-whole-symphony">Containers, microservices, and orchestrating the whole symphony by Uri Cohen</a></li><li><a target="_blank" rel="noopener" href="https://opensource.com/bus/15/3/google-grpc-open-source-remote-procedure-calls">Google shares gRPC as alternative to REST for microservices by Luis Ibáñez</a></li><li><a target="_blank" rel="noopener" href="https://opensource.com/business/15/2/interview-sarah-novotny-nginx">NGINX: The secret heart of the modern web by Jason Hibbets</a></li><li><a target="_blank" rel="noopener" href="https://opensource.com/business/15/5/api-integrations-with-python-and-zato">Smart API integrations with Python and Zato by Dariusz Suchojad</a></li><li><a target="_blank" rel="noopener" href="https://opensource.com/business/14/7/interview-jerome-petazzoni-docker">Senior software engineer Petazzoni on the breathtaking growth of Docker by Richard Morrell</a></li></ul><h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul><li><a target="_blank" rel="noopener" href="https://opensource.com/resources/what-are-microservices">What are microservices?</a></li></ul></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://jiangdequan.github.io">Jiang Dequan</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://jiangdequan.github.io/posts/8b0d9e7/">https://jiangdequan.github.io/posts/8b0d9e7/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://jiangdequan.github.io" target="_blank">JavaHub</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/">微服务</a><a class="post-meta__tags" href="/tags/%E5%BC%80%E6%BA%90/">开源</a><a class="post-meta__tags" href="/tags/%E5%AE%B9%E5%99%A8/">容器</a><a class="post-meta__tags" href="/tags/SOA/">SOA</a></div><div class="post-share"><div class="social-share" data-image="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/butterfly-extsrc/1.1.4/sharejs/dist/css/share.min.css" media="print" onload='this.media="all"'><script src="https://cdnjs.cloudflare.com/ajax/libs/butterfly-extsrc/1.1.4/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/posts/66587c06/" title="如何安装 Docker？"><div class="cover" style="background:var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">如何安装 Docker？</div></div><div class="info-2"><div class="info-item-1">前前后后安装了多次 Docker，每次都会折腾很久，也会遇到很多问题，在这里简单记录下安装过程以及遇到的问题（在虚拟机中基于 CentOS 7，均在 root 账户下操作）。 要求Docker 要求 CentOS 系统的内核版本高于 3.10，可使用如下指令查看系统内核版本 1uname -r 安装所需工具1yum install -y yum-utils device-mapper-persistent-data lvm2 添加 yum 国内镜像仓库1yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo 更新缓存1yum makecache fast 安装 Docker1yum -y install docker-ce 启用服务1systemctl start docker 开机自动启动（可选）1systemctl enable docker 添加 Docker 国内镜像由于国内网络原因，需要添加国内的镜像仓库，首先使用如下指令编...</div></div></div></a><a class="pagination-related" href="/posts/94103dca/" title="Tomcat 中集成 logback"><div class="cover" style="background:var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Tomcat 中集成 logback</div></div><div class="info-2"><div class="info-item-1">背景随着 Tomcat 长时间的运行，在其 logs 下面会产生大量的日志文件，但是 Tomcat 本身并未提供日志清理的功能，在一定时间后会占用一定的系统资源，而且该目录下的日志文件并不是十分重要，所以需要一种机制在一定的时机对日志文件进行管理。 方案脚本 + 定时任务12345#!/bin/bashecho &quot; &quot; &gt; /data/tomcat/logs/catalina.outfind /the/path/of/logs/ -type f -name &quot;*.log&quot; -mtime +7 -deletefind /the/path/of/logs/ -type f -name &quot;localhost_*.txt&quot; -mtime +7 -delete 以上是一个简单的 shell 命令，删除7天前的日志文件，将其保存到 clean_tomcat_log.sh，执行 crontab -e 编辑添加该脚本到定时任务。 logrotateLogrotate 是 Linux 自带的一个命令工具，一般的服务器都默认安装有...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/posts/66587c06/" title="如何安装 Docker？"><div class="cover" style="background:var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2018年11月14日</div><div class="info-item-2">如何安装 Docker？</div></div><div class="info-2"><div class="info-item-1">前前后后安装了多次 Docker，每次都会折腾很久，也会遇到很多问题，在这里简单记录下安装过程以及遇到的问题（在虚拟机中基于 CentOS 7，均在 root 账户下操作）。 要求Docker 要求 CentOS 系统的内核版本高于 3.10，可使用如下指令查看系统内核版本 1uname -r 安装所需工具1yum install -y yum-utils device-mapper-persistent-data lvm2 添加 yum 国内镜像仓库1yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo 更新缓存1yum makecache fast 安装 Docker1yum -y install docker-ce 启用服务1systemctl start docker 开机自动启动（可选）1systemctl enable docker 添加 Docker 国内镜像由于国内网络原因，需要添加国内的镜像仓库，首先使用如下指令编...</div></div></div></a></div></div><hr class="custom-hr"><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg" onerror='this.onerror=null,this.src="/img/friend_404.gif"' alt="avatar"></div><div class="author-info-name">Jiang Dequan</div><div class="author-info-description">A blog of a Java developer, sharing experiences, tips, and insights on the journey of software development.</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">11</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">39</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/jiangdequan"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/jiangdequan" target="_blank" title="Github"><i class="fab fa-github" style="color:#24292e"></i></a><a class="social-icon" href="mailto:jiangdequan1314@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color:#4a7dbe"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%98%AF%E4%B8%80%E4%B8%AA%E6%96%B0%E6%A6%82%E5%BF%B5%E5%90%97%EF%BC%9F"><span class="toc-number">1.</span> <span class="toc-text">微服务是一个新概念吗？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E5%BC%80%E6%BA%90%E5%AF%B9%E4%BA%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%BE%88%E9%87%8D%E8%A6%81%EF%BC%9F"><span class="toc-number">2.</span> <span class="toc-text">为什么开源对于微服务很重要？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E4%BB%8E%E4%BD%95%E8%80%8C%E6%9D%A5%EF%BC%9F"><span class="toc-number">3.</span> <span class="toc-text">容器技术从何而来？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%8D%8F%E8%B0%83%E5%BE%AE%E6%9C%8D%E5%8A%A1%EF%BC%9F"><span class="toc-number">4.</span> <span class="toc-text">如何协调微服务？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%B0%E6%9C%89%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E6%80%8E%E4%B9%88%E6%A0%B7%EF%BC%9F"><span class="toc-number">5.</span> <span class="toc-text">现有应用程序怎么样？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E5%93%AA%E9%87%8C%E5%8F%AF%E4%BB%A5%E4%BA%86%E8%A7%A3%E6%9B%B4%E5%A4%9A%EF%BC%9F"><span class="toc-number">6.</span> <span class="toc-text">在哪里可以了解更多？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-number">7.</span> <span class="toc-text">参考文档</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/53533583/" title="Hive 内表与外表的区别及分区删除行为分析">Hive 内表与外表的区别及分区删除行为分析</a><time datetime="2025-08-19T03:27:00.000Z" title="发表于 2025年08月19日 11:27:00">2025年08月19日</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/606268cb/" title="IDEA：打造最强 IDE，教你如何集成 Tomcat！">IDEA：打造最强 IDE，教你如何集成 Tomcat！</a><time datetime="2020-02-06T06:03:00.000Z" title="发表于 2020年02月06日 14:03:00">2020年02月06日</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/377ed362/" title="IDEA：打造最强 IDE，这些配置你知道吗？">IDEA：打造最强 IDE，这些配置你知道吗？</a><time datetime="2020-02-05T07:22:46.000Z" title="发表于 2020年02月05日 15:22:46">2020年02月05日</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/5e244d22/" title="如何创建随机数？">如何创建随机数？</a><time datetime="2018-12-24T00:53:16.000Z" title="发表于 2018年12月24日 08:53:16">2018年12月24日</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/f29d8bb0/" title="如何搭建一个优雅的开发环境？">如何搭建一个优雅的开发环境？</a><time datetime="2018-11-16T05:13:00.000Z" title="发表于 2018年11月16日 13:13:00">2018年11月16日</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2013 - 2025 By Jiang Dequan</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/node-snackbar/0.1.16/snackbar.min.js"></script><div class="js-pjax"><script>(() => {
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = `%%{init:{ 'theme':'${theme}'}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.9.0/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const initValine = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyValine = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const valineConfig = {
+      el: '#vcomment',
+      appId: '4ig8HD4BU3Jdup2Ksnp5Co4o-gzGzoHsz',
+      appKey: '7wRc8g1GiVE4P97KAAOZxDte',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      visitor: false,
+      ...option,
+      path: isShuoshuo ? path : (option && option.path) || window.location.pathname
+    }
+
+    new Valine(valineConfig)
+  }
+
+  const loadValine = async (el, path) => {
+    if (typeof Valine === 'function') {
+      initValine(el, path)
+    } else {
+      await btf.getScript('https://cdnjs.cloudflare.com/ajax/libs/valine/1.5.3/Valine.min.js')
+      initValine(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Valine' === 'Valine'
+      ? window.shuoshuoComment = { loadComment: loadValine }
+      : window.loadOtherComment = loadValine
+    return
+  }
+
+  if ('Valine' === 'Valine' || !true) {
+    if (true) btf.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

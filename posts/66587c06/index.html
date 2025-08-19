@@ -1,0 +1,257 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>如何安装 Docker？ | JavaHub</title><meta name="author" content="Jiang Dequan"><meta name="copyright" content="Jiang Dequan"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="前前后后安装了多次 Docker，每次都会折腾很久，也会遇到很多问题，在这里简单记录下安装过程以及遇到的问题（在虚拟机中基于 CentOS 7，均在 root 账户下操作）。"><meta property="og:type" content="article"><meta property="og:title" content="如何安装 Docker？"><meta property="og:url" content="https://jiangdequan.github.io/posts/66587c06/index.html"><meta property="og:site_name" content="JavaHub"><meta property="og:description" content="前前后后安装了多次 Docker，每次都会折腾很久，也会遇到很多问题，在这里简单记录下安装过程以及遇到的问题（在虚拟机中基于 CentOS 7，均在 root 账户下操作）。"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg"><meta property="article:published_time" content="2018-11-14T10:19:18.000Z"><meta property="article:modified_time" content="2025-03-03T10:00:07.560Z"><meta property="article:author" content="Jiang Dequan"><meta property="article:tag" content="微服务"><meta property="article:tag" content="Docker"><meta property="article:tag" content="SSH"><meta property="article:tag" content="代理"><meta property="article:tag" content="CentOS 7"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "如何安装 Docker？",
+  "url": "https://jiangdequan.github.io/posts/66587c06/",
+  "image": "https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg",
+  "datePublished": "2018-11-14T10:19:18.000Z",
+  "dateModified": "2025-03-03T10:00:07.560Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Jiang Dequan",
+      "url": "https://jiangdequan.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://s2.loli.net/2023/12/29/Nfp8D9oMJsBWRrG.png"><link rel="canonical" href="https://jiangdequan.github.io/posts/66587c06/index.html"><link rel="preconnect" href="//cdnjs.cloudflare.com"><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""><link rel="preconnect" href="//hm.baidu.com"><link rel="preconnect" href="//static.cloudflareinsights.com"><link rel="preconnect" href="//www.clarity.ms"><link rel="preconnect" href="//busuanzi.ibruce.info"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/node-snackbar/0.1.16/snackbar.min.css" media="print" onload='this.media="all"'><script>(() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()</script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?bc0445e7c42c61f5dc373e69ac7ee59e";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+btf.addGlobalFn('pjaxComplete', () => {
+  _hmt.push(['_trackPageview',window.location.pathname])
+}, 'baidu_analytics')</script><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-127646245-1"></script><script>window.dataLayer = window.dataLayer || []
+function gtag(){dataLayer.push(arguments)}
+gtag('js', new Date())
+gtag('config', 'UA-127646245-1')
+btf.addGlobalFn('pjaxComplete', () => {
+  gtag('config', 'UA-127646245-1', {'page_path': window.location.pathname})
+}, 'google_analytics')</script><script defer="defer" data-pjax="data-pjax" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{&quot;token&quot;: &quot;66d74019765e485785de38de87092572&quot;}"></script><script>!function(t,e,n,a,c,r,s){t[n]=t[n]||function(){(t[n].q=t[n].q||[]).push(arguments)},(r=e.createElement(a)).async=1,r.src="https://www.clarity.ms/tag/kda872w6hw",(s=e.getElementsByTagName(a)[0]).parentNode.insertBefore(r,s)}(window,document,"clarity","script")</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Jiang Dequan","link":"链接: ","source":"来源: JavaHub","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'null',
+  Snackbar: {"chs_to_cht":"已切换为繁体中文","cht_to_chs":"已切换为简体中文","day_to_night":"已切换为深色模式","night_to_day":"已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"bottom-left"},
+  infinitegrid: {
+    js: 'https://cdnjs.cloudflare.com/ajax/libs/egjs-infinitegrid/4.12.0/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE={title:"如何安装 Docker？",isHighlightShrink:!1,isToc:!0,pageType:"post"}</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg" onerror='this.onerror=null,this.src="/img/friend_404.gif"' alt="avatar"></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">11</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">39</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 影视</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 收藏</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background:linear-gradient(20deg,#0062be,#925696,#cc426e,#fb0347)"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">JavaHub</span></a><a class="nav-page-title" href="/"><span class="site-name">如何安装 Docker？</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span> 返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 影视</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 收藏</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">如何安装 Docker？</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2018-11-14T10:19:18.000Z" title="发表于 2018年11月14日 18:19:18">2018年11月14日</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-03-03T10:00:07.560Z" title="更新于 2025年03月03日 18:00:07">2025年03月03日</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%9E%B6%E6%9E%84%E7%AF%87/">架构篇</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">1209</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>5分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>前前后后安装了多次 Docker，每次都会折腾很久，也会遇到很多问题，在这里简单记录下安装过程以及遇到的问题（在虚拟机中基于 CentOS 7，均在 root 账户下操作）。</p><span id="more"></span><h2 id="要求"><a href="#要求" class="headerlink" title="要求"></a>要求</h2><p>Docker 要求 CentOS 系统的内核版本高于 3.10，可使用如下指令查看系统内核版本</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">uname -r</span><br></pre></td></tr></table></figure><h2 id="安装所需工具"><a href="#安装所需工具" class="headerlink" title="安装所需工具"></a>安装所需工具</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y yum-utils device-mapper-persistent-data lvm2</span><br></pre></td></tr></table></figure><h2 id="添加-yum-国内镜像仓库"><a href="#添加-yum-国内镜像仓库" class="headerlink" title="添加 yum 国内镜像仓库"></a>添加 yum 国内镜像仓库</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo</span><br></pre></td></tr></table></figure><h2 id="更新缓存"><a href="#更新缓存" class="headerlink" title="更新缓存"></a>更新缓存</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum makecache fast</span><br></pre></td></tr></table></figure><h2 id="安装-Docker"><a href="#安装-Docker" class="headerlink" title="安装 Docker"></a>安装 Docker</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum -y install docker-ce</span><br></pre></td></tr></table></figure><h2 id="启用服务"><a href="#启用服务" class="headerlink" title="启用服务"></a>启用服务</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl start docker</span><br></pre></td></tr></table></figure><h2 id="开机自动启动（可选）"><a href="#开机自动启动（可选）" class="headerlink" title="开机自动启动（可选）"></a>开机自动启动（可选）</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl enable docker</span><br></pre></td></tr></table></figure><h2 id="添加-Docker-国内镜像"><a href="#添加-Docker-国内镜像" class="headerlink" title="添加 Docker 国内镜像"></a>添加 Docker 国内镜像</h2><p>由于国内网络原因，需要添加国内的镜像仓库，首先使用如下指令编辑该文件</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi /etc/docker/daemon.json</span><br></pre></td></tr></table></figure><p>添加如下内容：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;registry-mirrors&quot;: [&quot;https://registry.docker-cn.com&quot;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h2 id="刷新变化"><a href="#刷新变化" class="headerlink" title="刷新变化"></a>刷新变化</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload</span><br></pre></td></tr></table></figure><h2 id="重启Docker"><a href="#重启Docker" class="headerlink" title="重启Docker"></a>重启Docker</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart docker</span><br></pre></td></tr></table></figure><h2 id="配置代理（可选）"><a href="#配置代理（可选）" class="headerlink" title="配置代理（可选）"></a>配置代理（可选）</h2><p>如果你的网络需要配置代理，请执行如下指令</p><h3 id="配置-http-代理"><a href="#配置-http-代理" class="headerlink" title="配置 http 代理"></a>配置 http 代理</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi /etc/systemd/system/docker.service.d/http-proxy.conf</span><br></pre></td></tr></table></figure><p>添加下面的内容</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[Service] </span><br><span class="line">Environment=&quot;HTTP_PROXY=http://172.17.17.17:7777&quot; &quot;NO_PROXY=localhost,127.0.0.1,192.168.23.4&quot;</span><br></pre></td></tr></table></figure><p><em>NO_PROXY 用来配置不需要使用代理的地址</em></p><h3 id="配置-https-代理"><a href="#配置-https-代理" class="headerlink" title="配置 https 代理"></a>配置 https 代理</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi /etc/systemd/system/docker.service.d/https-proxy.conf</span><br></pre></td></tr></table></figure><p>添加下面的内容</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[Service]</span><br><span class="line">Environment=&quot;HTTPS_PROXY=https://172.17.17.17:7777/&quot; &quot;NO_PROXY=localhost,127.0.0.1,192.168.23.4&quot;</span><br></pre></td></tr></table></figure><p><strong>PS：其中的 <em>172.17.17.17:7777</em> 根据实际情况进行修改，如果代理不支持 HTTPS 的话，需要把 <em><a target="_blank" rel="noopener" href="https://172.17.17.17:7777/">https://172.17.17.17:7777/</a></em> 中的 https 改成 http，否则回报 tls 的错误</strong></p><h2 id="配置-bip"><a href="#配置-bip" class="headerlink" title="配置 bip"></a>配置 bip</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi /etc/docker/daemon.json</span><br></pre></td></tr></table></figure><p>添加以下内容：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;bip&quot;: &quot;192.168.2.23/24&quot;</span><br></pre></td></tr></table></figure><p><strong>PS：修改的网段不要和虚拟机 IP，代理在同一网段，否则可能导致 SSH 无法连接虚拟机或者 Docker 无法上网等问题</strong></p><h2 id="其他问题"><a href="#其他问题" class="headerlink" title="其他问题"></a>其他问题</h2><h3 id="VBox-无界面启动-CentOS"><a href="#VBox-无界面启动-CentOS" class="headerlink" title="VBox 无界面启动 CentOS"></a>VBox 无界面启动 CentOS</h3><p>将以下指令保存为 bat 格式文件，双击即可</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">@D:</span><br><span class="line">@cd D:\Program Files\Oracle\VirtualBox</span><br><span class="line">VBoxManage.exe startvm &quot;Centos7&quot; --type headless</span><br></pre></td></tr></table></figure><p>如果要关闭虚拟机，则采用如下的脚本即可</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">@D:</span><br><span class="line">@cd D:\Program Files\Oracle\VirtualBox</span><br><span class="line">VBoxManage.exe controlvm &quot;Centos7&quot; poweroff</span><br></pre></td></tr></table></figure><p><strong>PS：其中 <em>D:\Program Files\Oracle\VirtualBox</em> 为 VBox 的安装目录，<em>Centos7</em> 为你需要启动的虚拟机名称</strong></p><h3 id="关闭-CentOS-7-的防火墙"><a href="#关闭-CentOS-7-的防火墙" class="headerlink" title="关闭 CentOS 7 的防火墙"></a>关闭 CentOS 7 的防火墙</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 停止 firewall</span><br><span class="line">systemctl stop firewalld.service</span><br><span class="line"></span><br><span class="line"># 禁止 firewall 开机启动</span><br><span class="line">systemctl disable firewalld.service</span><br></pre></td></tr></table></figure><p><strong>PS：由于是折腾用的虚拟机，无需使用防火墙，索性关闭了，避免其他问题</strong></p><h3 id="SSH-无法连接虚拟机"><a href="#SSH-无法连接虚拟机" class="headerlink" title="SSH 无法连接虚拟机"></a>SSH 无法连接虚拟机</h3><p>首先使用如下指令查看虚拟机的 IP</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip addr</span><br></pre></td></tr></table></figure><p>我们会得到以下信息，其中第二项（enp0s3，每个虚拟机网卡可能不太一样，这个值也不同）没有 inet 属性，导致无法连接</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN qlen 1</span><br><span class="line">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">    inet 127.0.0.1/8 scope host lo</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 ::1/128 scope host</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">2: enp0s3: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP qlen 1000</span><br><span class="line">    link/ether 08:00:27:08:9a:58 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">3: docker0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc noqueue state DOWN</span><br><span class="line">    link/ether 02:42:02:3d:70:d4 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 192.168.2.23/24 brd 192.168.2.255 scope global docker0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure><p>接下来我们使用如下指令修改该网卡的配置（CentOS 7 默认不启动网卡）</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi /etc/sysconfig/network-scripts/ifcfg-enp0s3</span><br></pre></td></tr></table></figure><p>将其中的 <strong>ONBOOT&#x3D;no</strong> 修改为 <strong>ONBOOT&#x3D;yes</strong>，重启网络服务</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service network restart</span><br></pre></td></tr></table></figure><p>再次使用 <em>ip addr</em> 查看 IP 地址信息，发现已经分配了 IP 地址信息了</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN qlen 1</span><br><span class="line">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">    inet 127.0.0.1/8 scope host lo</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 ::1/128 scope host</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">2: enp0s3: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP qlen 1000</span><br><span class="line">    link/ether 08:00:27:08:9a:58 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic enp0s3</span><br><span class="line">       valid_lft 86372sec preferred_lft 86372sec</span><br><span class="line">    inet6 fe80::9607:7c22:4201:a0dc/64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">3: docker0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc noqueue state DOWN</span><br><span class="line">    link/ether 02:42:02:3d:70:d4 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 192.168.2.23/24 brd 192.168.2.255 scope global docker0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure><p>然后，再次使用 SSH 进行连接，发现可以连接使用了，就是连接有点慢</p><h3 id="SSH-连接慢"><a href="#SSH-连接慢" class="headerlink" title="SSH 连接慢"></a>SSH 连接慢</h3><p>使用如下指令修改 SSHD 配置</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi /etc/ssh/sshd_config</span><br></pre></td></tr></table></figure><p>关闭DNS反向解析，修改 <em>UseDNS&#x3D;no</em>，配置是注释掉的，但是其默认值是 yes<br>关闭 SERVER上 的 GSS 认证，修改 <em>GSSAPIAuthentication no</em></p><h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul><li><a target="_blank" rel="noopener" href="https://blog.csdn.net/doiido/article/details/43793391">CentOS&#x2F;Linux 解决 SSH 连接慢</a></li><li><a target="_blank" rel="noopener" href="https://blog.csdn.net/dancheren/article/details/73611878">查看虚拟机里的Centos7的IP</a></li><li><a target="_blank" rel="noopener" href="http://www.runoob.com/docker/centos-docker-install.html">CentOS Docker 安装</a></li></ul></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://jiangdequan.github.io">Jiang Dequan</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://jiangdequan.github.io/posts/66587c06/">https://jiangdequan.github.io/posts/66587c06/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://jiangdequan.github.io" target="_blank">JavaHub</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/">微服务</a><a class="post-meta__tags" href="/tags/Docker/">Docker</a><a class="post-meta__tags" href="/tags/SSH/">SSH</a><a class="post-meta__tags" href="/tags/%E4%BB%A3%E7%90%86/">代理</a><a class="post-meta__tags" href="/tags/CentOS-7/">CentOS 7</a></div><div class="post-share"><div class="social-share" data-image="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/butterfly-extsrc/1.1.4/sharejs/dist/css/share.min.css" media="print" onload='this.media="all"'><script src="https://cdnjs.cloudflare.com/ajax/libs/butterfly-extsrc/1.1.4/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/posts/f29d8bb0/" title="如何搭建一个优雅的开发环境？"><div class="cover" style="background:var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">如何搭建一个优雅的开发环境？</div></div><div class="info-2"><div class="info-item-1">工欲善其事，必先利其器。一个顺手的开发环境，对于开发人员是非常有必要的，下面就给大家总结一些提升效率和便捷的工具。 Wox你还在为满屏幕的应用程序图标而烦恼吗？何不试试 Wox！这里简单给大家介绍下。Wox 是一款开源的启动器。用于快速搜索本机安装的各种程序，文件。也可以通过插件快速搜索网络内容，比如今天天气如何，某某电影的评分是多少等等。使用 Wox 后，桌面变得清爽了，几乎不留一个快捷方式。启动应用“Alt + 空格”，输入应用程序名称，回车就可以快速启动应用了。是不是很炫酷，还有其他很多功能和插件，赶紧试试吧！ EverythingEverything 是一款本地文件搜索的软件，能够在占用极少资源的情况下，快速索引和搜索电脑中的文件。是快速查找文件不可多得的利器。其与 Wox 结合使用，更加的便捷。 Classic Shell如果对系统的美观有一定的要求，可以试试这一款开源软件 Classic Shell，该软件可以美化任务栏、开始菜单、开始按钮等等界面进行美化。众多的设置项目，总有一款适合你。 Zeal作为程序员，查看 API 文档是学习的最基础操作，众多的文档如何保...</div></div></div></a><a class="pagination-related" href="/posts/8b0d9e7/" title="什么是微服务？"><div class="cover" style="background:var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">什么是微服务？</div></div><div class="info-2"><div class="info-item-1">贯穿微服务的核心思想是：当某些类型的应用程序被拆分为可以协同工作的、较小的、可组合的模块时，它们变得更加容易构建和维护。每个组件都是持续开发和单独维护的，这样整个应用程序就是由其它组件组合而成。这与传统的“单体”应用形成鲜明地对比，后者将所有的功能全部都融合在一个应用当中。 用一系列模块化的组件来构建应用更易于理解和测试，而且最重要的是在应用的整个生命周期中更易于维护。它使得公司或者组织能够实现更高的灵活性，并能够大大缩短开发、测试、投产等所需的时间。事实证明，这种方法更加出色，特别是对于由地理和文化多样化的开发人员团队开发的大型企业应用。 微服务还有其他一些好处： __开发人员独立性__：小型团队并行工作，并且可以比大型团队更快地迭代。 __隔离和弹性__：如果一个组件死了，你可以旋转另一个组件，然后应用程序的其余部分继续运行。 __可扩展性__：较小的组件占用较少的资源，并且可以进行扩展以仅满足该组件不断增长的需求。 __生命周期自动化__：单个组件更易于适应连续交付管道和复杂的部署方案，而单体应用则无法实现。 __与业务的关系__：微服务架构在业务领域边界上...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/posts/8b0d9e7/" title="什么是微服务？"><div class="cover" style="background:var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2018年10月31日</div><div class="info-item-2">什么是微服务？</div></div><div class="info-2"><div class="info-item-1">贯穿微服务的核心思想是：当某些类型的应用程序被拆分为可以协同工作的、较小的、可组合的模块时，它们变得更加容易构建和维护。每个组件都是持续开发和单独维护的，这样整个应用程序就是由其它组件组合而成。这与传统的“单体”应用形成鲜明地对比，后者将所有的功能全部都融合在一个应用当中。 用一系列模块化的组件来构建应用更易于理解和测试，而且最重要的是在应用的整个生命周期中更易于维护。它使得公司或者组织能够实现更高的灵活性，并能够大大缩短开发、测试、投产等所需的时间。事实证明，这种方法更加出色，特别是对于由地理和文化多样化的开发人员团队开发的大型企业应用。 微服务还有其他一些好处： __开发人员独立性__：小型团队并行工作，并且可以比大型团队更快地迭代。 __隔离和弹性__：如果一个组件死了，你可以旋转另一个组件，然后应用程序的其余部分继续运行。 __可扩展性__：较小的组件占用较少的资源，并且可以进行扩展以仅满足该组件不断增长的需求。 __生命周期自动化__：单个组件更易于适应连续交付管道和复杂的部署方案，而单体应用则无法实现。 __与业务的关系__：微服务架构在业务领域边界上...</div></div></div></a></div></div><hr class="custom-hr"><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg" onerror='this.onerror=null,this.src="/img/friend_404.gif"' alt="avatar"></div><div class="author-info-name">Jiang Dequan</div><div class="author-info-description">A blog of a Java developer, sharing experiences, tips, and insights on the journey of software development.</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">11</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">39</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/jiangdequan"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/jiangdequan" target="_blank" title="Github"><i class="fab fa-github" style="color:#24292e"></i></a><a class="social-icon" href="mailto:jiangdequan1314@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color:#4a7dbe"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A6%81%E6%B1%82"><span class="toc-number">1.</span> <span class="toc-text">要求</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E6%89%80%E9%9C%80%E5%B7%A5%E5%85%B7"><span class="toc-number">2.</span> <span class="toc-text">安装所需工具</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B7%BB%E5%8A%A0-yum-%E5%9B%BD%E5%86%85%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93"><span class="toc-number">3.</span> <span class="toc-text">添加 yum 国内镜像仓库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9B%B4%E6%96%B0%E7%BC%93%E5%AD%98"><span class="toc-number">4.</span> <span class="toc-text">更新缓存</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-Docker"><span class="toc-number">5.</span> <span class="toc-text">安装 Docker</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%AF%E7%94%A8%E6%9C%8D%E5%8A%A1"><span class="toc-number">6.</span> <span class="toc-text">启用服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%80%E6%9C%BA%E8%87%AA%E5%8A%A8%E5%90%AF%E5%8A%A8%EF%BC%88%E5%8F%AF%E9%80%89%EF%BC%89"><span class="toc-number">7.</span> <span class="toc-text">开机自动启动（可选）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B7%BB%E5%8A%A0-Docker-%E5%9B%BD%E5%86%85%E9%95%9C%E5%83%8F"><span class="toc-number">8.</span> <span class="toc-text">添加 Docker 国内镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%B7%E6%96%B0%E5%8F%98%E5%8C%96"><span class="toc-number">9.</span> <span class="toc-text">刷新变化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%87%8D%E5%90%AFDocker"><span class="toc-number">10.</span> <span class="toc-text">重启Docker</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E4%BB%A3%E7%90%86%EF%BC%88%E5%8F%AF%E9%80%89%EF%BC%89"><span class="toc-number">11.</span> <span class="toc-text">配置代理（可选）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE-http-%E4%BB%A3%E7%90%86"><span class="toc-number">11.1.</span> <span class="toc-text">配置 http 代理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE-https-%E4%BB%A3%E7%90%86"><span class="toc-number">11.2.</span> <span class="toc-text">配置 https 代理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE-bip"><span class="toc-number">12.</span> <span class="toc-text">配置 bip</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E9%97%AE%E9%A2%98"><span class="toc-number">13.</span> <span class="toc-text">其他问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#VBox-%E6%97%A0%E7%95%8C%E9%9D%A2%E5%90%AF%E5%8A%A8-CentOS"><span class="toc-number">13.1.</span> <span class="toc-text">VBox 无界面启动 CentOS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E9%97%AD-CentOS-7-%E7%9A%84%E9%98%B2%E7%81%AB%E5%A2%99"><span class="toc-number">13.2.</span> <span class="toc-text">关闭 CentOS 7 的防火墙</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SSH-%E6%97%A0%E6%B3%95%E8%BF%9E%E6%8E%A5%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="toc-number">13.3.</span> <span class="toc-text">SSH 无法连接虚拟机</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SSH-%E8%BF%9E%E6%8E%A5%E6%85%A2"><span class="toc-number">13.4.</span> <span class="toc-text">SSH 连接慢</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-number">14.</span> <span class="toc-text">参考文档</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/53533583/" title="Hive 内表与外表的区别及分区删除行为分析">Hive 内表与外表的区别及分区删除行为分析</a><time datetime="2025-08-19T03:27:00.000Z" title="发表于 2025年08月19日 11:27:00">2025年08月19日</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/606268cb/" title="IDEA：打造最强 IDE，教你如何集成 Tomcat！">IDEA：打造最强 IDE，教你如何集成 Tomcat！</a><time datetime="2020-02-06T06:03:00.000Z" title="发表于 2020年02月06日 14:03:00">2020年02月06日</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/377ed362/" title="IDEA：打造最强 IDE，这些配置你知道吗？">IDEA：打造最强 IDE，这些配置你知道吗？</a><time datetime="2020-02-05T07:22:46.000Z" title="发表于 2020年02月05日 15:22:46">2020年02月05日</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/5e244d22/" title="如何创建随机数？">如何创建随机数？</a><time datetime="2018-12-24T00:53:16.000Z" title="发表于 2018年12月24日 08:53:16">2018年12月24日</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/f29d8bb0/" title="如何搭建一个优雅的开发环境？">如何搭建一个优雅的开发环境？</a><time datetime="2018-11-16T05:13:00.000Z" title="发表于 2018年11月16日 13:13:00">2018年11月16日</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2013 - 2025 By Jiang Dequan</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/node-snackbar/0.1.16/snackbar.min.js"></script><div class="js-pjax"><script>(() => {
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = `%%{init:{ 'theme':'${theme}'}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.9.0/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const initValine = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyValine = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const valineConfig = {
+      el: '#vcomment',
+      appId: '4ig8HD4BU3Jdup2Ksnp5Co4o-gzGzoHsz',
+      appKey: '7wRc8g1GiVE4P97KAAOZxDte',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      visitor: false,
+      ...option,
+      path: isShuoshuo ? path : (option && option.path) || window.location.pathname
+    }
+
+    new Valine(valineConfig)
+  }
+
+  const loadValine = async (el, path) => {
+    if (typeof Valine === 'function') {
+      initValine(el, path)
+    } else {
+      await btf.getScript('https://cdnjs.cloudflare.com/ajax/libs/valine/1.5.3/Valine.min.js')
+      initValine(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Valine' === 'Valine'
+      ? window.shuoshuoComment = { loadComment: loadValine }
+      : window.loadOtherComment = loadValine
+    return
+  }
+
+  if ('Valine' === 'Valine' || !true) {
+    if (true) btf.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>如何搭建一个自己的博客 | JavaHub</title><meta name="author" content="Jiang Dequan"><meta name="copyright" content="Jiang Dequan"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="好记性不如烂笔头。作为一个程序员，有一个博客记录学习的过程十分必要。特此记录下搭建博客的过程。"><meta property="og:type" content="article"><meta property="og:title" content="如何搭建一个自己的博客"><meta property="og:url" content="https://jiangdequan.github.io/posts/25857550/index.html"><meta property="og:site_name" content="JavaHub"><meta property="og:description" content="好记性不如烂笔头。作为一个程序员，有一个博客记录学习的过程十分必要。特此记录下搭建博客的过程。"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg"><meta property="article:published_time" content="2016-11-17T14:13:00.000Z"><meta property="article:modified_time" content="2025-03-03T10:00:07.560Z"><meta property="article:author" content="Jiang Dequan"><meta property="article:tag" content="博客"><meta property="article:tag" content="Hexo"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "如何搭建一个自己的博客",
+  "url": "https://jiangdequan.github.io/posts/25857550/",
+  "image": "https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg",
+  "datePublished": "2016-11-17T14:13:00.000Z",
+  "dateModified": "2025-03-03T10:00:07.560Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Jiang Dequan",
+      "url": "https://jiangdequan.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://s2.loli.net/2023/12/29/Nfp8D9oMJsBWRrG.png"><link rel="canonical" href="https://jiangdequan.github.io/posts/25857550/index.html"><link rel="preconnect" href="//cdnjs.cloudflare.com"><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""><link rel="preconnect" href="//hm.baidu.com"><link rel="preconnect" href="//static.cloudflareinsights.com"><link rel="preconnect" href="//www.clarity.ms"><link rel="preconnect" href="//busuanzi.ibruce.info"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/node-snackbar/0.1.16/snackbar.min.css" media="print" onload='this.media="all"'><script>(() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()</script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?bc0445e7c42c61f5dc373e69ac7ee59e";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+btf.addGlobalFn('pjaxComplete', () => {
+  _hmt.push(['_trackPageview',window.location.pathname])
+}, 'baidu_analytics')</script><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-127646245-1"></script><script>window.dataLayer = window.dataLayer || []
+function gtag(){dataLayer.push(arguments)}
+gtag('js', new Date())
+gtag('config', 'UA-127646245-1')
+btf.addGlobalFn('pjaxComplete', () => {
+  gtag('config', 'UA-127646245-1', {'page_path': window.location.pathname})
+}, 'google_analytics')</script><script defer="defer" data-pjax="data-pjax" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{&quot;token&quot;: &quot;66d74019765e485785de38de87092572&quot;}"></script><script>!function(t,e,n,a,c,r,s){t[n]=t[n]||function(){(t[n].q=t[n].q||[]).push(arguments)},(r=e.createElement(a)).async=1,r.src="https://www.clarity.ms/tag/kda872w6hw",(s=e.getElementsByTagName(a)[0]).parentNode.insertBefore(r,s)}(window,document,"clarity","script")</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Jiang Dequan","link":"链接: ","source":"来源: JavaHub","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'null',
+  Snackbar: {"chs_to_cht":"已切换为繁体中文","cht_to_chs":"已切换为简体中文","day_to_night":"已切换为深色模式","night_to_day":"已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"bottom-left"},
+  infinitegrid: {
+    js: 'https://cdnjs.cloudflare.com/ajax/libs/egjs-infinitegrid/4.12.0/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE={title:"如何搭建一个自己的博客",isHighlightShrink:!1,isToc:!0,pageType:"post"}</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg" onerror='this.onerror=null,this.src="/img/friend_404.gif"' alt="avatar"></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">11</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">39</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 影视</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 收藏</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background:linear-gradient(20deg,#0062be,#925696,#cc426e,#fb0347)"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">JavaHub</span></a><a class="nav-page-title" href="/"><span class="site-name">如何搭建一个自己的博客</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span> 返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 影视</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 收藏</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">如何搭建一个自己的博客</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2016-11-17T14:13:00.000Z" title="发表于 2016年11月17日 22:13:00">2016年11月17日</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-03-03T10:00:07.560Z" title="更新于 2025年03月03日 18:00:07">2025年03月03日</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%89%A9%E5%B1%95%E7%AF%87/">扩展篇</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">731</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>2分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>好记性不如烂笔头。作为一个程序员，有一个博客记录学习的过程十分必要。特此记录下搭建博客的过程。</p><span id="more"></span><h2 id="Hexo"><a href="#Hexo" class="headerlink" title="Hexo"></a>Hexo</h2><blockquote><p>A fast, simple &amp; powerful blog framework. You write posts in <a target="_blank" rel="noopener" href="http://daringfireball.net/projects/markdown/">Markdown</a> (or other languages) and Hexo generates static files with a beautiful theme in seconds.</p></blockquote><p><a target="_blank" rel="noopener" href="https://hexo.io/">Hexo官网</a>有比较详细的说明，包括Hexo的介绍如何安装，API，插件，主题等</p><h3 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h3><p>这里简单介绍下 windows 下如何安装 Hexo</p><ul><li>安装<a target="_blank" rel="noopener" href="https://nodejs.org/en/">Node.js</a></li><li>安装<a target="_blank" rel="noopener" href="https://git-scm.com/">Git</a></li></ul><p>以上两个程序到官网选择 windows 对应版本下载直接安装即可，安装成功后，执行以下命令安装 Hexo：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm install -g hexo-cli</span><br></pre></td></tr></table></figure><p>如果安装太慢或者无法安装，可以切换到国内镜像<a target="_blank" rel="noopener" href="https://npm.taobao.org/">淘宝 NPM 镜像</a>，安装完成执行以下命令查看是否安装成功：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>回车之后会显示相应的版本信息</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">hexo-cli: 1.0.2</span><br><span class="line">os: Windows_NT 6.1.7601 win32 x64</span><br><span class="line">http_parser: 2.5.2</span><br><span class="line">node: 4.4.7</span><br><span class="line">v8: 4.5.103.36</span><br><span class="line">uv: 1.8.0</span><br><span class="line">zlib: 1.2.8</span><br><span class="line">ares: 1.10.1-DEV</span><br><span class="line">icu: 56.1</span><br><span class="line">modules: 46</span><br><span class="line">openssl: 1.0.2h</span><br></pre></td></tr></table></figure><h3 id="开始博客之旅"><a href="#开始博客之旅" class="headerlink" title="开始博客之旅"></a>开始博客之旅</h3><p>创建一个默认的博客目录，这里我以 temp 为文件名做为实例，temp 可根据喜好进行修改：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ hexo init temp</span><br><span class="line">$ cd temp</span><br><span class="line">$ npm install</span><br></pre></td></tr></table></figure><p>通过以上几步，一个默认模板的博客就创建好了，现在开始访问下吧：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>只要端口没有被占用就可以通过 localhost:4000 进行访问了，当然也可以指定一个你喜欢的端口:</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server -p 8888</span><br></pre></td></tr></table></figure><h3 id="主题使用"><a href="#主题使用" class="headerlink" title="主题使用"></a>主题使用</h3><p>接下来开始为博客添加各式各样的主题吧，你也可以综合各主题的优势进行整合，这里只介绍如何使用其中一款主题。Hexo 官网提供了 60+ 款主题可随意挑选，找到主题GitHub 地址，后续会用到。</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ cd temp</span><br><span class="line">$ git clone https://github.com/DrakeLeung/hexo-theme-again.git themes/xxx</span><br></pre></td></tr></table></figure><p>说明 <em><a target="_blank" rel="noopener" href="https://github.com/DrakeLeung/hexo-theme-again.git">https://github.com/DrakeLeung/hexo-theme-again.git</a></em> 地址为博客主题 GitHub 地址，<em>xxx</em> 根据自己而定，后面会用到。</p><p>编辑博客根目录下的 <em>_config.yml</em> 文件应用主题，一般主题都有使用说明的，而且每个主题的使用方式也不一样，这里就不再赘述了</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">theme: xxx</span><br></pre></td></tr></table></figure><h3 id="发布到-GitHub"><a href="#发布到-GitHub" class="headerlink" title="发布到 GitHub"></a>发布到 GitHub</h3><p>Hexo 也提供了各种各样的发布插件，这里以 <em>hexo-deployer-git</em> 为例作为讲解。</p><p>编辑根目录下 package.json，添加发布插件</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;hexo-deployer-git&quot;: &quot;^0.2.0&quot;</span><br></pre></td></tr></table></figure><p>安装插件</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm install</span><br></pre></td></tr></table></figure><p>或者不使用以上方法，直接执行以下命令进行安装：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm install hexo-deployer-git --save</span><br></pre></td></tr></table></figure><p>安装好之后配置根目录下 _config.yml 文件：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">deploy:</span><br><span class="line">  type: github</span><br><span class="line">  repository: https://github.com/yourgithub/yourgithub.github.io.git</span><br><span class="line">  branch: master</span><br></pre></td></tr></table></figure><p>开始发布</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><h3 id="后话"><a href="#后话" class="headerlink" title="后话"></a>后话</h3><p>完成上述一系列工作之后，后面只需要在 <em>source&#x2F;_posts&#x2F;</em> 下编写 md 文件就可以了，发布参照上一步。</p></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://jiangdequan.github.io">Jiang Dequan</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://jiangdequan.github.io/posts/25857550/">https://jiangdequan.github.io/posts/25857550/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://jiangdequan.github.io" target="_blank">JavaHub</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%8D%9A%E5%AE%A2/">博客</a><a class="post-meta__tags" href="/tags/Hexo/">Hexo</a></div><div class="post-share"><div class="social-share" data-image="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/butterfly-extsrc/1.1.4/sharejs/dist/css/share.min.css" media="print" onload='this.media="all"'><script src="https://cdnjs.cloudflare.com/ajax/libs/butterfly-extsrc/1.1.4/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/posts/f05c72d4/" title="在 Windows 7 下如何删除路径过长的文件？"><div class="cover" style="background:var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">在 Windows 7 下如何删除路径过长的文件？</div></div><div class="info-2"><div class="info-item-1">作为程序员，在编写BUG的过程中，时不时会遇到自己或者队友挖的坑，程序生成了路径过深的文件，导致无法删除。下面介绍一个指令，可以用来填坑！ robocopy一个复制文件数据的命令行工具，在 Windows 7 中已经集成了。关于 robocopy 的跟多介绍 点击这里，我就不提供翻译了服务了。 如何使用1robocopy empty_dir will_delete_dir /purge 只需要在要删除的文件的同级目录下执行上述指令即可删除顽固的文件。其中 empty_dir 指新建的空白目录，will_delete_dir 指要删除的目录。</div></div></div></a><a class="pagination-related" href="/posts/3bc43dd6/" title="三星 Note 3（SM-N9009）ROM 汇总"><div class="cover" style="background:var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">三星 Note 3（SM-N9009）ROM 汇总</div></div><div class="info-2"><div class="info-item-1">博客升级了，原来的文章被清理了，暂时把原来的 ROM 整理了下！大家凑合刷刷吧，毕竟都好几年的机子了！ ROM 列表 序号 安卓版本 系统名称 双卡 Patchrom 自编译内核 下载地址 1 KitKat(4.4) TOS √ √ × 下载地址 2 KitKat(4.4) MIUI7 × √ × 下载地址 提取码: cpxc 3 Lollipop(5.0) FlymeOS4.5 √ √ × 下载地址 4 Lollipop(5.1) CyanogenMod 12.1 × × √ 下载地址 5 Lollipop(5.1) Phronesis Rom v6.5 Feature Rich × × √ 下载地址 6 Lollipop(5.1) FlymeOS5 × √ √ 下载地址 7 Marshmallow(6.0) CyanogenMod 13(trader418) × × √ 下载地址 8 Marshmallow(6.0) CyanogenMod 13(christer12) × × √ 下载地址 9 Marshmallow(6.0) R...</div></div></div></a></nav><hr class="custom-hr"><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg" onerror='this.onerror=null,this.src="/img/friend_404.gif"' alt="avatar"></div><div class="author-info-name">Jiang Dequan</div><div class="author-info-description">A blog of a Java developer, sharing experiences, tips, and insights on the journey of software development.</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">11</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">39</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/jiangdequan"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/jiangdequan" target="_blank" title="Github"><i class="fab fa-github" style="color:#24292e"></i></a><a class="social-icon" href="mailto:jiangdequan1314@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color:#4a7dbe"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Hexo"><span class="toc-number">1.</span> <span class="toc-text">Hexo</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-number">1.1.</span> <span class="toc-text">环境准备</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B%E5%8D%9A%E5%AE%A2%E4%B9%8B%E6%97%85"><span class="toc-number">1.2.</span> <span class="toc-text">开始博客之旅</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BB%E9%A2%98%E4%BD%BF%E7%94%A8"><span class="toc-number">1.3.</span> <span class="toc-text">主题使用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%91%E5%B8%83%E5%88%B0-GitHub"><span class="toc-number">1.4.</span> <span class="toc-text">发布到 GitHub</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E8%AF%9D"><span class="toc-number">1.5.</span> <span class="toc-text">后话</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/53533583/" title="Hive 内表与外表的区别及分区删除行为分析">Hive 内表与外表的区别及分区删除行为分析</a><time datetime="2025-08-19T03:27:00.000Z" title="发表于 2025年08月19日 11:27:00">2025年08月19日</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/606268cb/" title="IDEA：打造最强 IDE，教你如何集成 Tomcat！">IDEA：打造最强 IDE，教你如何集成 Tomcat！</a><time datetime="2020-02-06T06:03:00.000Z" title="发表于 2020年02月06日 14:03:00">2020年02月06日</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/377ed362/" title="IDEA：打造最强 IDE，这些配置你知道吗？">IDEA：打造最强 IDE，这些配置你知道吗？</a><time datetime="2020-02-05T07:22:46.000Z" title="发表于 2020年02月05日 15:22:46">2020年02月05日</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/5e244d22/" title="如何创建随机数？">如何创建随机数？</a><time datetime="2018-12-24T00:53:16.000Z" title="发表于 2018年12月24日 08:53:16">2018年12月24日</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/f29d8bb0/" title="如何搭建一个优雅的开发环境？">如何搭建一个优雅的开发环境？</a><time datetime="2018-11-16T05:13:00.000Z" title="发表于 2018年11月16日 13:13:00">2018年11月16日</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2013 - 2025 By Jiang Dequan</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/node-snackbar/0.1.16/snackbar.min.js"></script><div class="js-pjax"><script>(() => {
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = `%%{init:{ 'theme':'${theme}'}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.9.0/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const initValine = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyValine = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const valineConfig = {
+      el: '#vcomment',
+      appId: '4ig8HD4BU3Jdup2Ksnp5Co4o-gzGzoHsz',
+      appKey: '7wRc8g1GiVE4P97KAAOZxDte',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      visitor: false,
+      ...option,
+      path: isShuoshuo ? path : (option && option.path) || window.location.pathname
+    }
+
+    new Valine(valineConfig)
+  }
+
+  const loadValine = async (el, path) => {
+    if (typeof Valine === 'function') {
+      initValine(el, path)
+    } else {
+      await btf.getScript('https://cdnjs.cloudflare.com/ajax/libs/valine/1.5.3/Valine.min.js')
+      initValine(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Valine' === 'Valine'
+      ? window.shuoshuoComment = { loadComment: loadValine }
+      : window.loadOtherComment = loadValine
+    return
+  }
+
+  if ('Valine' === 'Valine' || !true) {
+    if (true) btf.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
