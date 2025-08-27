@@ -1,0 +1,257 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Nginx 四层与七层转发详解及应用场景 | JavaHub</title><meta name="author" content="Jiang Dequan"><meta name="copyright" content="Jiang Dequan"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="在现代互联网架构中，高并发、低延迟、灵活的流量转发与负载均衡 是后端服务设计的核心目标。作为一款高性能的开源 Web 服务器和反向代理服务器，Nginx 在企业级应用中被广泛用于流量调度。其强大之处不仅在于处理 HTTP 请求，还能承担 TCP&#x2F;UDP 层面的转发工作。理解 四层转发 和 七层转发 的区别及应用场景，对合理设计系统架构至关重要。 OSI 七层网络模型简介在介绍 Nginx"><meta property="og:type" content="article"><meta property="og:title" content="Nginx 四层与七层转发详解及应用场景"><meta property="og:url" content="https://jiangdequan.github.io/posts/3c950e28/index.html"><meta property="og:site_name" content="JavaHub"><meta property="og:description" content="在现代互联网架构中，高并发、低延迟、灵活的流量转发与负载均衡 是后端服务设计的核心目标。作为一款高性能的开源 Web 服务器和反向代理服务器，Nginx 在企业级应用中被广泛用于流量调度。其强大之处不仅在于处理 HTTP 请求，还能承担 TCP&#x2F;UDP 层面的转发工作。理解 四层转发 和 七层转发 的区别及应用场景，对合理设计系统架构至关重要。 OSI 七层网络模型简介在介绍 Nginx"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg"><meta property="article:published_time" content="2025-08-27T05:19:00.000Z"><meta property="article:modified_time" content="2025-08-27T05:51:47.093Z"><meta property="article:author" content="Jiang Dequan"><meta property="article:tag" content="Nginx"><meta property="article:tag" content="四层转发"><meta property="article:tag" content="七层转发"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Nginx 四层与七层转发详解及应用场景",
+  "url": "https://jiangdequan.github.io/posts/3c950e28/",
+  "image": "https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg",
+  "datePublished": "2025-08-27T05:19:00.000Z",
+  "dateModified": "2025-08-27T05:51:47.093Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Jiang Dequan",
+      "url": "https://jiangdequan.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://s2.loli.net/2023/12/29/Nfp8D9oMJsBWRrG.png"><link rel="canonical" href="https://jiangdequan.github.io/posts/3c950e28/index.html"><link rel="preconnect" href="//cdnjs.cloudflare.com"><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""><link rel="preconnect" href="//hm.baidu.com"><link rel="preconnect" href="//static.cloudflareinsights.com"><link rel="preconnect" href="//www.clarity.ms"><link rel="preconnect" href="//busuanzi.ibruce.info"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/node-snackbar/0.1.16/snackbar.min.css" media="print" onload='this.media="all"'><script>(() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()</script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?bc0445e7c42c61f5dc373e69ac7ee59e";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+btf.addGlobalFn('pjaxComplete', () => {
+  _hmt.push(['_trackPageview',window.location.pathname])
+}, 'baidu_analytics')</script><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-127646245-1"></script><script>window.dataLayer = window.dataLayer || []
+function gtag(){dataLayer.push(arguments)}
+gtag('js', new Date())
+gtag('config', 'UA-127646245-1')
+btf.addGlobalFn('pjaxComplete', () => {
+  gtag('config', 'UA-127646245-1', {'page_path': window.location.pathname})
+}, 'google_analytics')</script><script defer="defer" data-pjax="data-pjax" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{&quot;token&quot;: &quot;66d74019765e485785de38de87092572&quot;}"></script><script>!function(t,e,n,a,c,r,s){t[n]=t[n]||function(){(t[n].q=t[n].q||[]).push(arguments)},(r=e.createElement(a)).async=1,r.src="https://www.clarity.ms/tag/kda872w6hw",(s=e.getElementsByTagName(a)[0]).parentNode.insertBefore(r,s)}(window,document,"clarity","script")</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Jiang Dequan","link":"链接: ","source":"来源: JavaHub","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'null',
+  Snackbar: {"chs_to_cht":"已切换为繁体中文","cht_to_chs":"已切换为简体中文","day_to_night":"已切换为深色模式","night_to_day":"已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"bottom-left"},
+  infinitegrid: {
+    js: 'https://cdnjs.cloudflare.com/ajax/libs/egjs-infinitegrid/4.12.0/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE={title:"Nginx 四层与七层转发详解及应用场景",isHighlightShrink:!1,isToc:!0,pageType:"post"}</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg" onerror='this.onerror=null,this.src="/img/friend_404.gif"' alt="avatar"></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">12</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">42</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 影视</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 收藏</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background:linear-gradient(20deg,#0062be,#925696,#cc426e,#fb0347)"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">JavaHub</span></a><a class="nav-page-title" href="/"><span class="site-name">Nginx 四层与七层转发详解及应用场景</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span> 返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 影视</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 收藏</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Nginx 四层与七层转发详解及应用场景</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-08-27T05:19:00.000Z" title="发表于 2025年08月27日 13:19:00">2025年08月27日</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-08-27T05:51:47.093Z" title="更新于 2025年08月27日 13:51:47">2025年08月27日</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%9E%B6%E6%9E%84%E7%AF%87/">架构篇</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">1178</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>3分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>在现代互联网架构中，高并发、低延迟、灵活的流量转发与负载均衡 是后端服务设计的核心目标。作为一款高性能的开源 Web 服务器和反向代理服务器，Nginx 在企业级应用中被广泛用于流量调度。其强大之处不仅在于处理 HTTP 请求，还能承担 TCP&#x2F;UDP 层面的转发工作。理解 四层转发 和 七层转发 的区别及应用场景，对合理设计系统架构至关重要。</p><h2 id="OSI-七层网络模型简介"><a href="#OSI-七层网络模型简介" class="headerlink" title="OSI 七层网络模型简介"></a>OSI 七层网络模型简介</h2><p><img src="/img/2025/08/osi-layer.png"><br>在介绍 Nginx 转发之前，我们先快速回顾 OSI 七层网络模型。它是网络通信的理论基础，将复杂的网络通信分为七个层次，每一层各司其职：</p><ol><li><p>物理层（Physical）：负责物理传输，比特流在物理介质中的传输（网线、光纤等）。</p></li><li><p>数据链路层（Data Link）：负责链路管理和错误检测（如以太网、MAC 地址）。</p></li><li><p>网络层（Network）：负责寻址与路由（如 IP 协议）。</p></li><li><p>传输层（Transport）：保证端到端的可靠通信（如 TCP、UDP）。</p></li><li><p>会话层（Session）：管理会话和连接（如 RPC、NetBIOS）。</p></li><li><p>表示层（Presentation）：处理数据的表示、加密、压缩（如 SSL&#x2F;TLS）。</p></li><li><p>应用层（Application）：面向最终用户的服务（如 HTTP、FTP、SMTP）。</p></li></ol><p>其中，Nginx 常用的 四层转发 对应的是 传输层，而 七层转发 对应的是 应用层。</p><h2 id="Nginx-四层转发（传输层代理）"><a href="#Nginx-四层转发（传输层代理）" class="headerlink" title="Nginx 四层转发（传输层代理）"></a>Nginx 四层转发（传输层代理）</h2><p><strong>定义：</strong> 四层转发基于 TCP&#x2F;UDP 协议，工作在传输层。它只关注 IP 和端口，不关心具体应用层协议内容。</p><p><strong>特点：</strong></p><ul><li><p>性能高，转发速度快。</p></li><li><p>不解析 HTTP 内容，支持所有基于 TCP&#x2F;UDP 的应用。</p></li><li><p>常用于数据库代理、TCP 协议的应用（如 MySQL、Redis）、游戏服务、MQ 等。</p></li></ul><p><strong>典型配置（stream 模块）：</strong></p><figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">stream</span> &#123;</span><br><span class="line">    <span class="section">upstream</span> backend &#123;</span><br><span class="line">        <span class="attribute">server</span> <span class="number">192.168.1.101:3306</span>;</span><br><span class="line">        <span class="attribute">server</span> <span class="number">192.168.1.102:3306</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="section">server</span> &#123;</span><br><span class="line">        <span class="attribute">listen</span> <span class="number">3306</span>;</span><br><span class="line">        <span class="attribute">proxy_pass</span> backend;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>该配置示例中，Nginx 在 3306 端口监听请求，并将流量分发到两台 MySQL 服务器，实现数据库负载均衡。</p><h2 id="Nginx-七层转发（应用层代理）"><a href="#Nginx-七层转发（应用层代理）" class="headerlink" title="Nginx 七层转发（应用层代理）"></a>Nginx 七层转发（应用层代理）</h2><p><strong>定义：</strong> 七层转发基于 HTTP&#x2F;HTTPS 协议，工作在应用层。Nginx 可以解析请求报文，根据 域名、URL、Header、Cookie 等进行灵活的转发。</p><p><strong>特点：</strong></p><ul><li><p>功能强大，可基于内容路由。</p></li><li><p>可实现动静分离、灰度发布、A&#x2F;B 测试。</p></li><li><p>可结合缓存、压缩、安全防护等功能。</p></li></ul><p><strong>典型配置（http 模块）：</strong></p><figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">http</span> &#123;</span><br><span class="line">    <span class="section">upstream</span> web_backend &#123;</span><br><span class="line">        <span class="attribute">server</span> <span class="number">192.168.1.201:80</span>;</span><br><span class="line">        <span class="attribute">server</span> <span class="number">192.168.1.202:80</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="section">server</span> &#123;</span><br><span class="line">        <span class="attribute">listen</span> <span class="number">80</span>;</span><br><span class="line">        <span class="attribute">server_name</span> www.example.com;</span><br><span class="line"></span><br><span class="line">        <span class="section">location</span> /api/ &#123;</span><br><span class="line">            <span class="attribute">proxy_pass</span> http://web_backend;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="section">location</span> /static/ &#123;</span><br><span class="line">            <span class="attribute">root</span> /usr/share/nginx/html;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>在该示例中：</p><ul><li><p><code>/api/</code> 请求被代理到后端应用服务器。</p></li><li><p><code>/static/</code> 请求直接由 Nginx 提供静态资源，提高响应效率。</p></li></ul><h2 id="四层与七层转发的对比"><a href="#四层与七层转发的对比" class="headerlink" title="四层与七层转发的对比"></a>四层与七层转发的对比</h2><p><img src="/../../img/2025/08/nginx-forwarding.png"></p><table><thead><tr><th>对比维度</th><th>四层转发 (L4)</th><th>七层转发 (L7)</th></tr></thead><tbody><tr><td>工作层次</td><td>传输层 (TCP&#x2F;UDP)</td><td>应用层 (HTTP&#x2F;HTTPS)</td></tr><tr><td>转发依据</td><td>IP + 端口</td><td>URL、Header、Cookie、域名等</td></tr><tr><td>性能</td><td>高，消耗资源少</td><td>相对较低，需要解析应用层协议</td></tr><tr><td>支持协议</td><td>所有 TCP&#x2F;UDP 协议</td><td>仅限 HTTP&#x2F;HTTPS、SMTP 等应用层协议</td></tr><tr><td>应用场景</td><td>数据库代理、MQ、TCP 服务</td><td>Web 网站、微服务、API 网关</td></tr></tbody></table><h2 id="应用场景选择"><a href="#应用场景选择" class="headerlink" title="应用场景选择"></a>应用场景选择</h2><p><strong>适合用四层转发的场景：</strong></p><ul><li><p>数据库负载均衡（MySQL、PostgreSQL）。</p></li><li><p>消息队列（Kafka、RabbitMQ）。</p></li><li><p>游戏服务器、长连接 TCP 服务。</p></li><li><p>需要最大性能、最少解析的情况。</p></li></ul><p><strong>适合用七层转发的场景：</strong></p><ul><li><p>Web 应用、API 网关。</p></li><li><p>根据 URL&#x2F;域名做多服务路由。</p></li><li><p>灰度发布、A&#x2F;B 测试。</p></li><li><p>动静分离与缓存优化。</p></li><li><p>安全防护（如 WAF、DDoS 防护）。</p></li></ul><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Nginx 在现代架构中既能作为<code>四层传输代理</code>，也能作为<code>七层应用代理</code>，两者的核心区别在于<code>转发层次与灵活性</code>：</p><ul><li><p>四层代理偏向于<code>高性能、低消耗</code> 的传输层转发，适合 TCP&#x2F;UDP 类应用。</p></li><li><p>七层代理偏向于<code>智能路由、业务逻辑控制</code>，适合复杂的 Web 与微服务架构。</p></li></ul><p>理解并合理利用这两种模式，能够让系统<code>性能与灵活性</code>之间找到最佳平衡点。</p><p>Nginx 提供了强大的四层和七层转发功能，能够满足不同场景下的需求。理解它们的区别和应用场景，能够帮助我们设计出高效、稳定的系统架构。在实际应用中，根据业务需求和性能要求，选择合适的转发方式，是保障系统正常运行的关键。</p></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://jiangdequan.github.io">Jiang Dequan</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://jiangdequan.github.io/posts/3c950e28/">https://jiangdequan.github.io/posts/3c950e28/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://jiangdequan.github.io" target="_blank">JavaHub</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Nginx/">Nginx</a><a class="post-meta__tags" href="/tags/%E5%9B%9B%E5%B1%82%E8%BD%AC%E5%8F%91/">四层转发</a><a class="post-meta__tags" href="/tags/%E4%B8%83%E5%B1%82%E8%BD%AC%E5%8F%91/">七层转发</a></div><div class="post-share"><div class="social-share" data-image="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/butterfly-extsrc/1.1.4/sharejs/dist/css/share.min.css" media="print" onload='this.media="all"'><script src="https://cdnjs.cloudflare.com/ajax/libs/butterfly-extsrc/1.1.4/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/posts/53533583/" title="Hive 内表与外表的区别及分区删除行为分析"><div class="cover" style="background:var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Hive 内表与外表的区别及分区删除行为分析</div></div><div class="info-2"><div class="info-item-1">在日常使用 Hive 进行数据仓库开发和分析时，内表（Managed Table） 和 外表（External Table） 是最常用的两种表类型。理解它们在数据管理上的差异，尤其是在删除表和删除分区时的行为，对保障数据安全非常关键。本文将从定义、使用场景、判断方法以及分区删除的行为几个方面进行详细解析。 Hive 内表（Managed Table）定义 内表的数据和元数据都由 Hive 管理。 表数据文件默认存放在 Hive 仓库目录（hive.metastore.warehouse.dir，通常是 &#x2F;user&#x2F;hive&#x2F;warehouse&#x2F;）。 DDL1234567891011-- 建立一个内表，数据存放在 Hive 默认仓库目录下CREATE TABLE student_managed ( id INT, name STRING, age INT)ROW FORMAT DELIMITEDFIELDS TERMINATED BY &#x27;\t&#x27;; -- 按制表符分隔-- 加载数据到内表（会拷贝...</div></div></div></a></nav><hr class="custom-hr"><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg" onerror='this.onerror=null,this.src="/img/friend_404.gif"' alt="avatar"></div><div class="author-info-name">Jiang Dequan</div><div class="author-info-description">A blog of a Java developer, sharing experiences, tips, and insights on the journey of software development.</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">12</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">42</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/jiangdequan"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/jiangdequan" target="_blank" title="Github"><i class="fab fa-github" style="color:#24292e"></i></a><a class="social-icon" href="mailto:jiangdequan1314@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color:#4a7dbe"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#OSI-%E4%B8%83%E5%B1%82%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">OSI 七层网络模型简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Nginx-%E5%9B%9B%E5%B1%82%E8%BD%AC%E5%8F%91%EF%BC%88%E4%BC%A0%E8%BE%93%E5%B1%82%E4%BB%A3%E7%90%86%EF%BC%89"><span class="toc-number">2.</span> <span class="toc-text">Nginx 四层转发（传输层代理）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Nginx-%E4%B8%83%E5%B1%82%E8%BD%AC%E5%8F%91%EF%BC%88%E5%BA%94%E7%94%A8%E5%B1%82%E4%BB%A3%E7%90%86%EF%BC%89"><span class="toc-number">3.</span> <span class="toc-text">Nginx 七层转发（应用层代理）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E5%B1%82%E4%B8%8E%E4%B8%83%E5%B1%82%E8%BD%AC%E5%8F%91%E7%9A%84%E5%AF%B9%E6%AF%94"><span class="toc-number">4.</span> <span class="toc-text">四层与七层转发的对比</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF%E9%80%89%E6%8B%A9"><span class="toc-number">5.</span> <span class="toc-text">应用场景选择</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/3c950e28/" title="Nginx 四层与七层转发详解及应用场景">Nginx 四层与七层转发详解及应用场景</a><time datetime="2025-08-27T05:19:00.000Z" title="发表于 2025年08月27日 13:19:00">2025年08月27日</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/53533583/" title="Hive 内表与外表的区别及分区删除行为分析">Hive 内表与外表的区别及分区删除行为分析</a><time datetime="2025-08-19T03:27:00.000Z" title="发表于 2025年08月19日 11:27:00">2025年08月19日</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/606268cb/" title="IDEA：打造最强 IDE，教你如何集成 Tomcat！">IDEA：打造最强 IDE，教你如何集成 Tomcat！</a><time datetime="2020-02-06T06:03:00.000Z" title="发表于 2020年02月06日 14:03:00">2020年02月06日</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/377ed362/" title="IDEA：打造最强 IDE，这些配置你知道吗？">IDEA：打造最强 IDE，这些配置你知道吗？</a><time datetime="2020-02-05T07:22:46.000Z" title="发表于 2020年02月05日 15:22:46">2020年02月05日</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/5e244d22/" title="如何创建随机数？">如何创建随机数？</a><time datetime="2018-12-24T00:53:16.000Z" title="发表于 2018年12月24日 08:53:16">2018年12月24日</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2013 - 2025 By Jiang Dequan</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/node-snackbar/0.1.16/snackbar.min.js"></script><div class="js-pjax"><script>(() => {
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = `%%{init:{ 'theme':'${theme}'}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.9.0/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const initValine = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyValine = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const valineConfig = {
+      el: '#vcomment',
+      appId: '4ig8HD4BU3Jdup2Ksnp5Co4o-gzGzoHsz',
+      appKey: '7wRc8g1GiVE4P97KAAOZxDte',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      visitor: false,
+      ...option,
+      path: isShuoshuo ? path : (option && option.path) || window.location.pathname
+    }
+
+    new Valine(valineConfig)
+  }
+
+  const loadValine = async (el, path) => {
+    if (typeof Valine === 'function') {
+      initValine(el, path)
+    } else {
+      await btf.getScript('https://cdnjs.cloudflare.com/ajax/libs/valine/1.5.3/Valine.min.js')
+      initValine(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Valine' === 'Valine'
+      ? window.shuoshuoComment = { loadComment: loadValine }
+      : window.loadOtherComment = loadValine
+    return
+  }
+
+  if ('Valine' === 'Valine' || !true) {
+    if (true) btf.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
