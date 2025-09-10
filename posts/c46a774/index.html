@@ -1,0 +1,257 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>微调中的数据收集与准备 | JavaHub</title><meta name="author" content="Jiang Dequan"><meta name="copyright" content="Jiang Dequan"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="引言俗话说：「巧妇难为无米之炊」。再先进的微调方法，如果没有高质量数据，也难以训练出效果优秀的模型。 在微调大模型的过程中，数据是决定成败的关键。本篇将介绍如何收集、清洗和准备数据。 数据收集来源 开源代码仓库   GitHub、GitLab 开放项目 适合补全、重构等任务   技术问答平台   StackOverflow、知乎技术区 获取「问题-解答」类数据   企业内部数据   代码库、接口文"><meta property="og:type" content="article"><meta property="og:title" content="微调中的数据收集与准备"><meta property="og:url" content="https://jiangdequan.github.io/posts/c46a774/index.html"><meta property="og:site_name" content="JavaHub"><meta property="og:description" content="引言俗话说：「巧妇难为无米之炊」。再先进的微调方法，如果没有高质量数据，也难以训练出效果优秀的模型。 在微调大模型的过程中，数据是决定成败的关键。本篇将介绍如何收集、清洗和准备数据。 数据收集来源 开源代码仓库   GitHub、GitLab 开放项目 适合补全、重构等任务   技术问答平台   StackOverflow、知乎技术区 获取「问题-解答」类数据   企业内部数据   代码库、接口文"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg"><meta property="article:published_time" content="2025-09-06T02:29:00.000Z"><meta property="article:modified_time" content="2025-09-06T06:36:46.877Z"><meta property="article:author" content="Jiang Dequan"><meta property="article:tag" content="LLM"><meta property="article:tag" content="大模型"><meta property="article:tag" content="数据收集"><meta property="article:tag" content="数据清洗"><meta property="article:tag" content="数据标注"><meta property="article:tag" content="训练数据"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "微调中的数据收集与准备",
+  "url": "https://jiangdequan.github.io/posts/c46a774/",
+  "image": "https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg",
+  "datePublished": "2025-09-06T02:29:00.000Z",
+  "dateModified": "2025-09-06T06:36:46.877Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Jiang Dequan",
+      "url": "https://jiangdequan.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://s2.loli.net/2023/12/29/Nfp8D9oMJsBWRrG.png"><link rel="canonical" href="https://jiangdequan.github.io/posts/c46a774/index.html"><link rel="preconnect" href="//cdnjs.cloudflare.com"><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""><link rel="preconnect" href="//hm.baidu.com"><link rel="preconnect" href="//static.cloudflareinsights.com"><link rel="preconnect" href="//www.clarity.ms"><link rel="preconnect" href="//busuanzi.ibruce.info"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/node-snackbar/0.1.16/snackbar.min.css" media="print" onload='this.media="all"'><script>(() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()</script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?bc0445e7c42c61f5dc373e69ac7ee59e";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+btf.addGlobalFn('pjaxComplete', () => {
+  _hmt.push(['_trackPageview',window.location.pathname])
+}, 'baidu_analytics')</script><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-127646245-1"></script><script>window.dataLayer = window.dataLayer || []
+function gtag(){dataLayer.push(arguments)}
+gtag('js', new Date())
+gtag('config', 'UA-127646245-1')
+btf.addGlobalFn('pjaxComplete', () => {
+  gtag('config', 'UA-127646245-1', {'page_path': window.location.pathname})
+}, 'google_analytics')</script><script defer="defer" data-pjax="data-pjax" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{&quot;token&quot;: &quot;66d74019765e485785de38de87092572&quot;}"></script><script>!function(t,e,n,a,c,r,s){t[n]=t[n]||function(){(t[n].q=t[n].q||[]).push(arguments)},(r=e.createElement(a)).async=1,r.src="https://www.clarity.ms/tag/kda872w6hw",(s=e.getElementsByTagName(a)[0]).parentNode.insertBefore(r,s)}(window,document,"clarity","script")</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Jiang Dequan","link":"链接: ","source":"来源: JavaHub","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'null',
+  Snackbar: {"chs_to_cht":"已切换为繁体中文","cht_to_chs":"已切换为简体中文","day_to_night":"已切换为深色模式","night_to_day":"已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"bottom-left"},
+  infinitegrid: {
+    js: 'https://cdnjs.cloudflare.com/ajax/libs/egjs-infinitegrid/4.12.0/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE={title:"微调中的数据收集与准备",isHighlightShrink:!1,isToc:!0,pageType:"post"}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg" onerror='this.onerror=null,this.src="/img/friend_404.gif"' alt="avatar"></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">58</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 影视</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 收藏</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background:linear-gradient(20deg,#0062be,#925696,#cc426e,#fb0347)"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">JavaHub</span></a><a class="nav-page-title" href="/"><span class="site-name">微调中的数据收集与准备</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span> 返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 影视</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 收藏</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">微调中的数据收集与准备</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-09-06T02:29:00.000Z" title="发表于 2025年09月06日 10:29:00">2025年09月06日</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-09-06T06:36:46.877Z" title="更新于 2025年09月06日 14:36:46">2025年09月06日</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%BF%9B%E9%98%B6%E7%AF%87/">进阶篇</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>俗话说：「巧妇难为无米之炊」。再先进的微调方法，如果没有高质量数据，也难以训练出效果优秀的模型。</p><p>在微调大模型的过程中，数据是决定成败的关键。本篇将介绍如何收集、清洗和准备数据。</p><h2 id="数据收集来源"><a href="#数据收集来源" class="headerlink" title="数据收集来源"></a>数据收集来源</h2><ol><li>开源代码仓库</li></ol><ul><li>GitHub、GitLab 开放项目</li><li>适合补全、重构等任务</li></ul><ol start="2"><li>技术问答平台</li></ol><ul><li>StackOverflow、知乎技术区</li><li>获取「问题-解答」类数据</li></ul><ol start="3"><li>企业内部数据</li></ol><ul><li>代码库、接口文档、设计规范</li><li>最贴近实际需求，但需注意隐私与安全</li></ul><ol start="4"><li>合成数据</li></ol><ul><li>使用大模型生成初步数据，再人工复核</li></ul><h2 id="数据清洗"><a href="#数据清洗" class="headerlink" title="数据清洗"></a>数据清洗</h2><p>在微调大模型的过程中，数据质量直接决定了模型性能。原始数据往往存在重复、错误、格式不统一或不相关内容，如果直接用于训练，会导致模型学习到错误模式或产生偏差。因此，数据清洗是保证微调效果的关键环节。</p><p>数据清洗的主要步骤：</p><ul><li><strong>去重与格式统一</strong><ul><li>去除重复的代码片段或指令-响应对，避免模型过度记忆重复样例</li><li>将不同来源的数据统一格式，例如统一缩进、代码风格、注释规范</li></ul></li><li><strong>去除低质量或错误样例</strong><ul><li>移除语法错误、逻辑错误或不完整的数据</li><li>确保训练数据的正确性和可执行性</li></ul></li><li><strong>隐私和敏感信息处理</strong><ul><li>删除密码、密钥、客户数据等敏感信息</li><li>遵循企业数据安全和隐私规范，避免泄露敏感信息</li></ul></li><li><strong>覆盖多样性</strong><ul><li>不同编程语言、不同任务类型</li><li>确保模型能够处理各种场景和需求，避免过拟合</li></ul></li><li><strong>任务相关性筛选</strong><ul><li>保证数据与微调目标任务高度相关</li><li>例如用于代码生成的训练数据，应包含丰富的函数、类和业务逻辑示例</li></ul></li></ul><h2 id="数据标注"><a href="#数据标注" class="headerlink" title="数据标注"></a>数据标注</h2><p>高质量的数据不仅需要清洗，还需要<code>合理标注</code>，才能让大模型学到正确的模式和行为。数据标注是将原始数据转换为可用于模型训练的结构化形式的过程。</p><p>数据标注的主要内容：</p><ul><li><p><strong>标注类型</strong></p><ul><li>指令-响应对：将自然语言描述（如需求说明、问题）与目标输出（代码实现、修复方案）配对</li><li>错误-修复对：输入有错误的代码，输出修复后的正确代码</li><li>代码-解释对：输入代码片段，输出自然语言解释或注释</li></ul></li><li><p><strong>标注方法</strong></p><ul><li>人工标注：由专家或开发者手动标注，精确度高，但成本大</li><li>半自动标注：先用模型生成初步标注，再由人工审核和修正，提高效率</li><li>合成数据生成：利用大模型生成示例，再进行人工或自动筛选</li></ul></li><li><p><strong>标注规范</strong></p><ul><li><strong>标注一致性</strong>：同一任务不同样例遵循统一格式</li><li><strong>任务相关性</strong>：只标注与目标任务直接相关的内容</li><li><strong>可执行性</strong>：尤其是代码类数据，标注后的代码应能正确编译或运行</li></ul></li><li><p><strong>标注质量控制</strong></p><ul><li><strong>多人交叉审核</strong>：多人对标注数据进行审核，减少主观误差</li><li><strong>样本抽查和自动验证</strong>：对标注数据进行随机抽查，确保数据可靠</li><li><strong>定期更新和扩充标注数据</strong>：根据模型表现和任务需求，定期更新和扩充标注数据，保持数据的新鲜度和多样性</li></ul></li></ul><h2 id="数据划分"><a href="#数据划分" class="headerlink" title="数据划分"></a>数据划分</h2><p>在微调大模型时，除了收集、清洗和标注数据，还必须将数据合理划分为<code>训练集、验证集和测试集</code>，以保证模型能够有效学习，同时评估其泛化能力。</p><p>数据划分的重要性：</p><ol><li>训练集（Training Set）</li></ol><ul><li>用于模型参数的优化和学习</li><li>数据量通常占总数据的 70–80%</li><li>质量高且覆盖任务多样性，确保模型学到全面模式</li></ul><ol start="2"><li>验证集（Validation Set）</li></ol><ul><li>用于调参、监控训练过程和防止过拟合</li><li>数据量通常占 10–15%</li><li>与训练集保持相似分布，但不重复</li><li>可用于早停（Early Stopping）和选择最优模型</li></ul><ol start="3"><li>测试集（Test Set）</li></ol><ul><li>用于最终模型性能评估</li><li>数据量通常占 10–15%</li><li>与训练集和验证集独立</li><li>用于衡量模型在真实任务上的泛化能力</li></ul><p>划分方法与注意事项：</p><ul><li>比例控制：常用比例为 8:1:1 或 7:2:1，根据数据量和任务复杂度调整</li><li>分布一致性：确保训练、验证、测试集覆盖的任务类型、编程语言和代码风格一致</li><li>避免数据泄漏：训练集和测试集不得有重复或高度相似样本</li><li>迭代更新：随着新数据生成或收集，可适当更新验证集和测试集，保证评估结果可靠</li></ul><p>合理的数据划分是微调成功的基础，它保证模型既能充分学习，又能在未见数据上保持良好表现。</p><h2 id="数据质量评估"><a href="#数据质量评估" class="headerlink" title="数据质量评估"></a>数据质量评估</h2><p>在微调前，对数据进行<code>质量评估</code>至关重要。高质量的数据能直接提升模型性能，而低质量数据可能导致模型学习错误模式或偏差输出。</p><p>数据质量评估的主要指标：</p><ol><li>完整性（Completeness）</li></ol><ul><li>检查每条数据是否包含必要信息</li><li>例如，指令-响应对是否完整，代码片段是否可执行</li></ul><ol start="2"><li>正确性（Correctness）</li></ol><ul><li>数据是否准确、无语法错误或逻辑错误</li><li>对代码类数据，可通过静态检查或自动编译验证</li></ul><ol start="3"><li>一致性（Consistency）</li></ol><ul><li>数据标注和格式是否统一</li><li>同一类型任务的标注风格、命名规范应保持一致</li></ul><ol start="4"><li>相关性（Relevance）</li></ol><ul><li>数据是否与微调任务紧密相关</li><li>避免训练模型学习到无关或干扰信息</li></ul><ol start="5"><li>多样性（Diversity）</li></ol><ul><li>数据是否覆盖多种情况、语言、任务类型</li><li>保证模型能够泛化，而不是仅针对单一模式学习</li></ul><p>评估方法：</p><ul><li>人工抽查：随机抽样检查数据质量</li><li>自动化工具：使用静态分析、Lint 工具、格式检查脚本等</li><li>统计分析：统计数据分布、重复率、标注一致性等</li></ul><h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>对于大模型的微调，数据质量直接决定了模型效果的上限。建立一个<code>持续收集、清洗和更新</code>的数据管道，比一次性准备数据更重要。</p></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://jiangdequan.github.io">Jiang Dequan</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://jiangdequan.github.io/posts/c46a774/">https://jiangdequan.github.io/posts/c46a774/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://jiangdequan.github.io" target="_blank">JavaHub</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/LLM/">LLM</a><a class="post-meta__tags" href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">大模型</a><a class="post-meta__tags" href="/tags/%E6%95%B0%E6%8D%AE%E6%94%B6%E9%9B%86/">数据收集</a><a class="post-meta__tags" href="/tags/%E6%95%B0%E6%8D%AE%E6%B8%85%E6%B4%97/">数据清洗</a><a class="post-meta__tags" href="/tags/%E6%95%B0%E6%8D%AE%E6%A0%87%E6%B3%A8/">数据标注</a><a class="post-meta__tags" href="/tags/%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE/">训练数据</a></div><div class="post-share"><div class="social-share" data-image="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/butterfly-extsrc/1.1.4/sharejs/dist/css/share.min.css" media="print" onload='this.media="all"'><script src="https://cdnjs.cloudflare.com/ajax/libs/butterfly-extsrc/1.1.4/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/posts/cfbb0de9/" title="Oracle ORA-01653 错误分析与表空间扩容解决方案"><div class="cover" style="background:var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Oracle ORA-01653 错误分析与表空间扩容解决方案</div></div><div class="info-2"><div class="info-item-1">在日常的数据库运维或开发中，我们经常会遇到ORA-01653: 无法通过 N (在表空间 X 中) 扩展的报错。本文以一次实际案例为例，深入分析其原因，并总结相应的解决思路与最佳实践。 问题背景在对一张表 A 的 CLOB 字段执行 UPDATE 时，报错如下： 1ORA-01653: 表 A 无法通过 128 (在表空间 X 中) 扩展 错误提示表明：Oracle 在为该表分配新的区间（extent）时失败了，无法从表空间中申请到足够的存储空间。 原因分析出现 ORA-01653 的常见原因： 表空间容量不足 表或 LOB 段所在的表空间已接近满负荷，无法再分配新的 extent。 数据文件未开启自动扩展 数据文件达到最大大小，但没有开启 AUTOEXTEND。 单个数据文件大小限制 数据文件设置了固定大小，Oracle 不能继续扩展。 在本案例中，通过以下 SQL 查询确认了表 A 的 LOB 段所在的表空间： 123SELECT a.table_name, a.column_name, a.segment_name, a.tablespace_nameFROM ...</div></div></div></a><a class="pagination-related" href="/posts/ee28a247/" title="为什么要对大模型进行微调？"><div class="cover" style="background:var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">为什么要对大模型进行微调？</div></div><div class="info-2"><div class="info-item-1">引言近年来，大模型（LLM, Large Language Model）在自然语言处理和代码生成等领域取得了突破性进展。以 Qwen3-coder 为代表的新一代开源代码大模型，具备强大的代码补全、理解和生成能力。然而，通用大模型并不能直接满足所有业务场景：它们可能不符合企业内部的开发规范，无法覆盖特定领域的知识，也可能在特有任务上表现不佳。 这时候，「微调」就成为让大模型真正落地的关键。 什么是微调？微调（Fine-tuning）是指在一个已经预训练的大模型基础上，使用特定任务的数据对模型进行再训练，从而让模型更好地适配目标场景。与从零开始训练相比，微调所需的资源和时间要少得多。 这里的预训练大模型，是指在大规模的通用数据（如互联网文本、开源代码、技术文档等）上进行长时间训练后得到的基础模型。例如，Qwen3-coder 在预训练阶段学习了编程语言的语法结构、常见库函数、以及大量的自然语言描述，从而具备了理解代码和自然语言的通用能力。 但是，预训练并不能保证模型在特定场景下表现最佳。比如： 企业内部的开发规范（命名习惯、代码风格） 行业专属知识（金融交易规则、医疗影像处理代码...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/posts/939682c5/" title="大模型微调方法全解析"><div class="cover" style="background:var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025年09月06日</div><div class="info-item-2">大模型微调方法全解析</div></div><div class="info-2"><div class="info-item-1">引言在第一篇中，我们介绍了为什么需要对大模型进行微调。微调的意义已经明确，那么接下来最核心的问题就是：如何微调？ 在这一篇，我们将系统介绍几种主流微调方法，并结合 Qwen3-coder 的特点进行分析。 全参数微调（Full Fine-tuning）全参数微调（Full Fine-tuning）是最直接的一种微调方式，其核心思想是更新模型中的所有参数，使模型完全适应目标任务的数据分布和业务需求。 具体来说： 模型在预训练阶段已经学习了大量通用知识（例如编程语言语法、常用库函数、自然语言描述等）。 在全参数微调中，训练过程中每一层的权重和偏置参数都会被更新，让模型能够完全吸收新的任务特定信息。 这种方法可以实现最大的适配能力，使模型在特定任务上的表现达到最优。 优点：更新模型中的所有参数，模型能力充分释放，能够高度贴合目标任务。 缺点：对显存和算力要求高，大模型可能需要多卡 GPU 或 TPUs 才能训练。数据需求大，否则容易出现过拟合。训练成本高，迭代周期长。 适用场景：小规模模型或算力充足的环境。任务与预训练数据差异极大，需要模型完全重新学习任务特定模式。 参数高效微调（...</div></div></div></a><a class="pagination-related" href="/posts/ee28a247/" title="为什么要对大模型进行微调？"><div class="cover" style="background:var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025年09月06日</div><div class="info-item-2">为什么要对大模型进行微调？</div></div><div class="info-2"><div class="info-item-1">引言近年来，大模型（LLM, Large Language Model）在自然语言处理和代码生成等领域取得了突破性进展。以 Qwen3-coder 为代表的新一代开源代码大模型，具备强大的代码补全、理解和生成能力。然而，通用大模型并不能直接满足所有业务场景：它们可能不符合企业内部的开发规范，无法覆盖特定领域的知识，也可能在特有任务上表现不佳。 这时候，「微调」就成为让大模型真正落地的关键。 什么是微调？微调（Fine-tuning）是指在一个已经预训练的大模型基础上，使用特定任务的数据对模型进行再训练，从而让模型更好地适配目标场景。与从零开始训练相比，微调所需的资源和时间要少得多。 这里的预训练大模型，是指在大规模的通用数据（如互联网文本、开源代码、技术文档等）上进行长时间训练后得到的基础模型。例如，Qwen3-coder 在预训练阶段学习了编程语言的语法结构、常见库函数、以及大量的自然语言描述，从而具备了理解代码和自然语言的通用能力。 但是，预训练并不能保证模型在特定场景下表现最佳。比如： 企业内部的开发规范（命名习惯、代码风格） 行业专属知识（金融交易规则、医疗影像处理代码...</div></div></div></a></div></div><hr class="custom-hr"><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg" onerror='this.onerror=null,this.src="/img/friend_404.gif"' alt="avatar"></div><div class="author-info-name">Jiang Dequan</div><div class="author-info-description">A blog of a Java developer, sharing experiences, tips, and insights on the journey of software development.</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">58</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/jiangdequan"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/jiangdequan" target="_blank" title="Github"><i class="fab fa-github" style="color:#24292e"></i></a><a class="social-icon" href="mailto:jiangdequan1314@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color:#4a7dbe"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%95%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">引言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E6%94%B6%E9%9B%86%E6%9D%A5%E6%BA%90"><span class="toc-number">2.</span> <span class="toc-text">数据收集来源</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E6%B8%85%E6%B4%97"><span class="toc-number">3.</span> <span class="toc-text">数据清洗</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E6%A0%87%E6%B3%A8"><span class="toc-number">4.</span> <span class="toc-text">数据标注</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%88%92%E5%88%86"><span class="toc-number">5.</span> <span class="toc-text">数据划分</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E8%B4%A8%E9%87%8F%E8%AF%84%E4%BC%B0"><span class="toc-number">6.</span> <span class="toc-text">数据质量评估</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E8%AE%BA"><span class="toc-number">7.</span> <span class="toc-text">结论</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/cfbb0de9/" title="Oracle ORA-01653 错误分析与表空间扩容解决方案">Oracle ORA-01653 错误分析与表空间扩容解决方案</a><time datetime="2025-09-10T02:38:00.000Z" title="发表于 2025年09月10日 10:38:00">2025年09月10日</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/939682c5/" title="大模型微调方法全解析">大模型微调方法全解析</a><time datetime="2025-09-06T02:29:00.000Z" title="发表于 2025年09月06日 10:29:00">2025年09月06日</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/ee28a247/" title="为什么要对大模型进行微调？">为什么要对大模型进行微调？</a><time datetime="2025-09-06T02:29:00.000Z" title="发表于 2025年09月06日 10:29:00">2025年09月06日</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/c46a774/" title="微调中的数据收集与准备">微调中的数据收集与准备</a><time datetime="2025-09-06T02:29:00.000Z" title="发表于 2025年09月06日 10:29:00">2025年09月06日</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/3c950e28/" title="Nginx 四层与七层转发详解及应用场景">Nginx 四层与七层转发详解及应用场景</a><time datetime="2025-08-27T05:19:00.000Z" title="发表于 2025年08月27日 13:19:00">2025年08月27日</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2013 - 2025 By Jiang Dequan</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.0-b1</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/node-snackbar/0.1.16/snackbar.min.js"></script><div class="js-pjax"><script>(() => {
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = `%%{init:{ 'theme':'${theme}'}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.9.0/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const initValine = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyValine = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const valineConfig = {
+      el: '#vcomment',
+      appId: '4ig8HD4BU3Jdup2Ksnp5Co4o-gzGzoHsz',
+      appKey: '7wRc8g1GiVE4P97KAAOZxDte',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      visitor: false,
+      ...option,
+      path: isShuoshuo ? path : (option && option.path) || window.location.pathname
+    }
+
+    new Valine(valineConfig)
+  }
+
+  const loadValine = async (el, path) => {
+    if (typeof Valine === 'function') {
+      initValine(el, path)
+    } else {
+      await btf.getScript('https://cdnjs.cloudflare.com/ajax/libs/valine/1.5.3/Valine.min.js')
+      initValine(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Valine' === 'Valine'
+      ? window.shuoshuoComment = { loadComment: loadValine }
+      : window.loadOtherComment = loadValine
+    return
+  }
+
+  if ('Valine' === 'Valine' || !true) {
+    if (true) btf.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

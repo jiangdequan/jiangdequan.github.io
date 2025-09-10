@@ -1,0 +1,257 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>为什么要对大模型进行微调？ | JavaHub</title><meta name="author" content="Jiang Dequan"><meta name="copyright" content="Jiang Dequan"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="引言近年来，大模型（LLM, Large Language Model）在自然语言处理和代码生成等领域取得了突破性进展。以 Qwen3-coder 为代表的新一代开源代码大模型，具备强大的代码补全、理解和生成能力。然而，通用大模型并不能直接满足所有业务场景：它们可能不符合企业内部的开发规范，无法覆盖特定领域的知识，也可能在特有任务上表现不佳。 这时候，「微调」就成为让大模型真正落地的关键。 什么是"><meta property="og:type" content="article"><meta property="og:title" content="为什么要对大模型进行微调？"><meta property="og:url" content="https://jiangdequan.github.io/posts/ee28a247/index.html"><meta property="og:site_name" content="JavaHub"><meta property="og:description" content="引言近年来，大模型（LLM, Large Language Model）在自然语言处理和代码生成等领域取得了突破性进展。以 Qwen3-coder 为代表的新一代开源代码大模型，具备强大的代码补全、理解和生成能力。然而，通用大模型并不能直接满足所有业务场景：它们可能不符合企业内部的开发规范，无法覆盖特定领域的知识，也可能在特有任务上表现不佳。 这时候，「微调」就成为让大模型真正落地的关键。 什么是"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg"><meta property="article:published_time" content="2025-09-06T02:29:00.000Z"><meta property="article:modified_time" content="2025-09-06T06:36:46.877Z"><meta property="article:author" content="Jiang Dequan"><meta property="article:tag" content="LLM"><meta property="article:tag" content="大模型"><meta property="article:tag" content="Fine-tuning"><meta property="article:tag" content="微调"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "为什么要对大模型进行微调？",
+  "url": "https://jiangdequan.github.io/posts/ee28a247/",
+  "image": "https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg",
+  "datePublished": "2025-09-06T02:29:00.000Z",
+  "dateModified": "2025-09-06T06:36:46.877Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Jiang Dequan",
+      "url": "https://jiangdequan.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://s2.loli.net/2023/12/29/Nfp8D9oMJsBWRrG.png"><link rel="canonical" href="https://jiangdequan.github.io/posts/ee28a247/index.html"><link rel="preconnect" href="//cdnjs.cloudflare.com"><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""><link rel="preconnect" href="//hm.baidu.com"><link rel="preconnect" href="//static.cloudflareinsights.com"><link rel="preconnect" href="//www.clarity.ms"><link rel="preconnect" href="//busuanzi.ibruce.info"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/node-snackbar/0.1.16/snackbar.min.css" media="print" onload='this.media="all"'><script>(() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()</script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?bc0445e7c42c61f5dc373e69ac7ee59e";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+btf.addGlobalFn('pjaxComplete', () => {
+  _hmt.push(['_trackPageview',window.location.pathname])
+}, 'baidu_analytics')</script><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-127646245-1"></script><script>window.dataLayer = window.dataLayer || []
+function gtag(){dataLayer.push(arguments)}
+gtag('js', new Date())
+gtag('config', 'UA-127646245-1')
+btf.addGlobalFn('pjaxComplete', () => {
+  gtag('config', 'UA-127646245-1', {'page_path': window.location.pathname})
+}, 'google_analytics')</script><script defer="defer" data-pjax="data-pjax" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{&quot;token&quot;: &quot;66d74019765e485785de38de87092572&quot;}"></script><script>!function(t,e,n,a,c,r,s){t[n]=t[n]||function(){(t[n].q=t[n].q||[]).push(arguments)},(r=e.createElement(a)).async=1,r.src="https://www.clarity.ms/tag/kda872w6hw",(s=e.getElementsByTagName(a)[0]).parentNode.insertBefore(r,s)}(window,document,"clarity","script")</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Jiang Dequan","link":"链接: ","source":"来源: JavaHub","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'null',
+  Snackbar: {"chs_to_cht":"已切换为繁体中文","cht_to_chs":"已切换为简体中文","day_to_night":"已切换为深色模式","night_to_day":"已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"bottom-left"},
+  infinitegrid: {
+    js: 'https://cdnjs.cloudflare.com/ajax/libs/egjs-infinitegrid/4.12.0/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE={title:"为什么要对大模型进行微调？",isHighlightShrink:!1,isToc:!0,pageType:"post"}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg" onerror='this.onerror=null,this.src="/img/friend_404.gif"' alt="avatar"></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">58</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 影视</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 收藏</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background:linear-gradient(20deg,#0062be,#925696,#cc426e,#fb0347)"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">JavaHub</span></a><a class="nav-page-title" href="/"><span class="site-name">为什么要对大模型进行微调？</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span> 返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 影视</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 收藏</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">为什么要对大模型进行微调？</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-09-06T02:29:00.000Z" title="发表于 2025年09月06日 10:29:00">2025年09月06日</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-09-06T06:36:46.877Z" title="更新于 2025年09月06日 14:36:46">2025年09月06日</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%BF%9B%E9%98%B6%E7%AF%87/">进阶篇</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>近年来，大模型（LLM, Large Language Model）在自然语言处理和代码生成等领域取得了突破性进展。以 Qwen3-coder 为代表的新一代开源代码大模型，具备强大的代码补全、理解和生成能力。然而，通用大模型并不能直接满足所有业务场景：它们可能不符合企业内部的开发规范，无法覆盖特定领域的知识，也可能在特有任务上表现不佳。</p><p>这时候，「微调」就成为让大模型真正落地的关键。</p><h2 id="什么是微调？"><a href="#什么是微调？" class="headerlink" title="什么是微调？"></a>什么是微调？</h2><p>微调（Fine-tuning）是指在一个已经预训练的大模型基础上，使用特定任务的数据对模型进行再训练，从而让模型更好地适配目标场景。与从零开始训练相比，微调所需的资源和时间要少得多。</p><p>这里的预训练大模型，是指在大规模的通用数据（如互联网文本、开源代码、技术文档等）上进行长时间训练后得到的基础模型。例如，Qwen3-coder 在预训练阶段学习了编程语言的语法结构、常见库函数、以及大量的自然语言描述，从而具备了理解代码和自然语言的通用能力。</p><p>但是，预训练并不能保证模型在特定场景下表现最佳。比如：</p><ul><li>企业内部的开发规范（命名习惯、代码风格）</li><li>行业专属知识（金融交易规则、医疗影像处理代码）</li><li>特定任务（静态审查、Bug 定位、自动文档生成）</li></ul><p>因此，在预训练模型的通用能力之上，使用微调（Fine-tuning）可以让模型进一步学习任务相关数据，提升其在特定领域的效果。</p><p>它的典型流程是：</p><ul><li>从已有基座模型（如 Qwen3-coder）出发</li><li>使用任务相关数据进行再训练</li><li>得到在特定任务上更强的模型</li></ul><h2 id="为什么要微调？"><a href="#为什么要微调？" class="headerlink" title="为什么要微调？"></a>为什么要微调？</h2><p>虽然预训练模型具有广泛的通用能力，但在实际应用中仍存在局限。微调的核心价值在于让模型从通用能力向特定业务场景迁移，使其在特定任务上表现更好、更稳定，同时更贴合企业或行业的需求。</p><h3 id="提升特定任务性能"><a href="#提升特定任务性能" class="headerlink" title="提升特定任务性能"></a>提升特定任务性能</h3><p>通用模型虽然具备较强的通用性，但在代码补全、错误修复、静态审查等细分任务上，往往比不上一个专门微调过的模型。</p><h3 id="增强领域适配性"><a href="#增强领域适配性" class="headerlink" title="增强领域适配性"></a>增强领域适配性</h3><p>企业可能有自己的业务逻辑、代码规范、安全标准，这些需求并不会在开源语料中广泛存在。通过微调，可以让模型学习“企业特有的语言”。</p><h3 id="降低幻觉与错误率"><a href="#降低幻觉与错误率" class="headerlink" title="降低幻觉与错误率"></a>降低幻觉与错误率</h3><p>微调不仅能提升正确性，还能减少模型输出的“幻觉”，避免生成与任务无关的答案。</p><h3 id="节省成本"><a href="#节省成本" class="headerlink" title="节省成本"></a>节省成本</h3><p>与从头训练一个数十亿参数的大模型相比，微调只需要相对少量的数据和算力，即可达到理想效果。</p><h3 id="提高生产效率与用户体验"><a href="#提高生产效率与用户体验" class="headerlink" title="提高生产效率与用户体验"></a>提高生产效率与用户体验</h3><p>针对特定任务微调后的模型能够减少人工干预，提高代码生成、审查和问答等工作效率，让开发者体验更加顺畅。</p><h2 id="微调涉及的关键知识点"><a href="#微调涉及的关键知识点" class="headerlink" title="微调涉及的关键知识点"></a>微调涉及的关键知识点</h2><p>在理解了微调的意义后，我们还需要明确，微调不仅仅是简单“喂数据训练模型”，它涉及多方面的知识点，每一环都直接影响最终效果。</p><ul><li><p>数据：任务相关的高质量数据是微调的根基</p><p>微调的成败，很大程度上取决于数据是否高质量、与任务相关。模型需要从示例中学习正确模式，如果数据噪声大或与业务场景不匹配，模型性能可能反而下降。</p></li><li><p>方法：全参数微调、参数高效微调（LoRA&#x2F;QLoRA）等不同策略</p><p>不同的微调方法适用于不同场景：全参数微调能实现最大化适配，但资源消耗大；参数高效微调（如 LoRA、QLoRA）可以在有限显存下获得良好效果。了解各种方法的特点和适用条件，有助于选择最优方案。</p></li><li><p>硬件资源：GPU 显存大小、训练时间</p><p>微调需要考虑 GPU 显存、训练时间和算力成本。不同模型大小、微调方法和 batch size 会影响训练效率和稳定性，因此提前规划训练环境至关重要。</p></li><li><p>评估指标：如 BLEU、CodeBLEU、Pass@k，或人工评估</p><p>微调不是“训练完就完事”，必须通过科学指标评估效果。代码生成任务可用 BLEU、CodeBLEU、Pass@k 等自动指标，同时结合人工评估，保证模型生成的代码正确、可读且符合规范。</p></li></ul><p>微调不是一次性的操作。随着业务变化和新数据产生，模型需要持续更新，形成一个<code>微调-评估-迭代</code>的闭环，以保持长期有效性。</p><h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>微调不是大模型的“锦上添花”，而是让其走向实际应用的“必由之路”。对于 Qwen3-coder 这样的代码大模型而言，微调能够帮助它更好地适配开发者的日常工作，成为生产力工具。</p></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://jiangdequan.github.io">Jiang Dequan</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://jiangdequan.github.io/posts/ee28a247/">https://jiangdequan.github.io/posts/ee28a247/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://jiangdequan.github.io" target="_blank">JavaHub</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/LLM/">LLM</a><a class="post-meta__tags" href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">大模型</a><a class="post-meta__tags" href="/tags/Fine-tuning/">Fine-tuning</a><a class="post-meta__tags" href="/tags/%E5%BE%AE%E8%B0%83/">微调</a></div><div class="post-share"><div class="social-share" data-image="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/butterfly-extsrc/1.1.4/sharejs/dist/css/share.min.css" media="print" onload='this.media="all"'><script src="https://cdnjs.cloudflare.com/ajax/libs/butterfly-extsrc/1.1.4/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/posts/c46a774/" title="微调中的数据收集与准备"><div class="cover" style="background:var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">微调中的数据收集与准备</div></div><div class="info-2"><div class="info-item-1">引言俗话说：「巧妇难为无米之炊」。再先进的微调方法，如果没有高质量数据，也难以训练出效果优秀的模型。 在微调大模型的过程中，数据是决定成败的关键。本篇将介绍如何收集、清洗和准备数据。 数据收集来源 开源代码仓库 GitHub、GitLab 开放项目 适合补全、重构等任务 技术问答平台 StackOverflow、知乎技术区 获取「问题-解答」类数据 企业内部数据 代码库、接口文档、设计规范 最贴近实际需求，但需注意隐私与安全 合成数据 使用大模型生成初步数据，再人工复核 数据清洗在微调大模型的过程中，数据质量直接决定了模型性能。原始数据往往存在重复、错误、格式不统一或不相关内容，如果直接用于训练，会导致模型学习到错误模式或产生偏差。因此，数据清洗是保证微调效果的关键环节。 数据清洗的主要步骤： 去重与格式统一 去除重复的代码片段或指令-响应对，避免模型过度记忆重复样例 将不同来源的数据统一格式，例如统一缩进、代码风格、注释规范 去除低质量或错误样例 移除语法错误、逻辑错误或不完整的数据 确保训练数据的正确性和可执行性 隐私和敏感信息处理 删...</div></div></div></a><a class="pagination-related" href="/posts/939682c5/" title="大模型微调方法全解析"><div class="cover" style="background:var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">大模型微调方法全解析</div></div><div class="info-2"><div class="info-item-1">引言在第一篇中，我们介绍了为什么需要对大模型进行微调。微调的意义已经明确，那么接下来最核心的问题就是：如何微调？ 在这一篇，我们将系统介绍几种主流微调方法，并结合 Qwen3-coder 的特点进行分析。 全参数微调（Full Fine-tuning）全参数微调（Full Fine-tuning）是最直接的一种微调方式，其核心思想是更新模型中的所有参数，使模型完全适应目标任务的数据分布和业务需求。 具体来说： 模型在预训练阶段已经学习了大量通用知识（例如编程语言语法、常用库函数、自然语言描述等）。 在全参数微调中，训练过程中每一层的权重和偏置参数都会被更新，让模型能够完全吸收新的任务特定信息。 这种方法可以实现最大的适配能力，使模型在特定任务上的表现达到最优。 优点：更新模型中的所有参数，模型能力充分释放，能够高度贴合目标任务。 缺点：对显存和算力要求高，大模型可能需要多卡 GPU 或 TPUs 才能训练。数据需求大，否则容易出现过拟合。训练成本高，迭代周期长。 适用场景：小规模模型或算力充足的环境。任务与预训练数据差异极大，需要模型完全重新学习任务特定模式。 参数高效微调（...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/posts/939682c5/" title="大模型微调方法全解析"><div class="cover" style="background:var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025年09月06日</div><div class="info-item-2">大模型微调方法全解析</div></div><div class="info-2"><div class="info-item-1">引言在第一篇中，我们介绍了为什么需要对大模型进行微调。微调的意义已经明确，那么接下来最核心的问题就是：如何微调？ 在这一篇，我们将系统介绍几种主流微调方法，并结合 Qwen3-coder 的特点进行分析。 全参数微调（Full Fine-tuning）全参数微调（Full Fine-tuning）是最直接的一种微调方式，其核心思想是更新模型中的所有参数，使模型完全适应目标任务的数据分布和业务需求。 具体来说： 模型在预训练阶段已经学习了大量通用知识（例如编程语言语法、常用库函数、自然语言描述等）。 在全参数微调中，训练过程中每一层的权重和偏置参数都会被更新，让模型能够完全吸收新的任务特定信息。 这种方法可以实现最大的适配能力，使模型在特定任务上的表现达到最优。 优点：更新模型中的所有参数，模型能力充分释放，能够高度贴合目标任务。 缺点：对显存和算力要求高，大模型可能需要多卡 GPU 或 TPUs 才能训练。数据需求大，否则容易出现过拟合。训练成本高，迭代周期长。 适用场景：小规模模型或算力充足的环境。任务与预训练数据差异极大，需要模型完全重新学习任务特定模式。 参数高效微调（...</div></div></div></a><a class="pagination-related" href="/posts/c46a774/" title="微调中的数据收集与准备"><div class="cover" style="background:var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025年09月06日</div><div class="info-item-2">微调中的数据收集与准备</div></div><div class="info-2"><div class="info-item-1">引言俗话说：「巧妇难为无米之炊」。再先进的微调方法，如果没有高质量数据，也难以训练出效果优秀的模型。 在微调大模型的过程中，数据是决定成败的关键。本篇将介绍如何收集、清洗和准备数据。 数据收集来源 开源代码仓库 GitHub、GitLab 开放项目 适合补全、重构等任务 技术问答平台 StackOverflow、知乎技术区 获取「问题-解答」类数据 企业内部数据 代码库、接口文档、设计规范 最贴近实际需求，但需注意隐私与安全 合成数据 使用大模型生成初步数据，再人工复核 数据清洗在微调大模型的过程中，数据质量直接决定了模型性能。原始数据往往存在重复、错误、格式不统一或不相关内容，如果直接用于训练，会导致模型学习到错误模式或产生偏差。因此，数据清洗是保证微调效果的关键环节。 数据清洗的主要步骤： 去重与格式统一 去除重复的代码片段或指令-响应对，避免模型过度记忆重复样例 将不同来源的数据统一格式，例如统一缩进、代码风格、注释规范 去除低质量或错误样例 移除语法错误、逻辑错误或不完整的数据 确保训练数据的正确性和可执行性 隐私和敏感信息处理 删...</div></div></div></a></div></div><hr class="custom-hr"><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://s2.loli.net/2023/12/29/uFa3UAQ8MB5Exbk.jpg" onerror='this.onerror=null,this.src="/img/friend_404.gif"' alt="avatar"></div><div class="author-info-name">Jiang Dequan</div><div class="author-info-description">A blog of a Java developer, sharing experiences, tips, and insights on the journey of software development.</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">58</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/jiangdequan"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/jiangdequan" target="_blank" title="Github"><i class="fab fa-github" style="color:#24292e"></i></a><a class="social-icon" href="mailto:jiangdequan1314@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color:#4a7dbe"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%95%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">引言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%BE%AE%E8%B0%83%EF%BC%9F"><span class="toc-number">2.</span> <span class="toc-text">什么是微调？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%BE%AE%E8%B0%83%EF%BC%9F"><span class="toc-number">3.</span> <span class="toc-text">为什么要微调？</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%90%E5%8D%87%E7%89%B9%E5%AE%9A%E4%BB%BB%E5%8A%A1%E6%80%A7%E8%83%BD"><span class="toc-number">3.1.</span> <span class="toc-text">提升特定任务性能</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A2%9E%E5%BC%BA%E9%A2%86%E5%9F%9F%E9%80%82%E9%85%8D%E6%80%A7"><span class="toc-number">3.2.</span> <span class="toc-text">增强领域适配性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%99%8D%E4%BD%8E%E5%B9%BB%E8%A7%89%E4%B8%8E%E9%94%99%E8%AF%AF%E7%8E%87"><span class="toc-number">3.3.</span> <span class="toc-text">降低幻觉与错误率</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8A%82%E7%9C%81%E6%88%90%E6%9C%AC"><span class="toc-number">3.4.</span> <span class="toc-text">节省成本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%90%E9%AB%98%E7%94%9F%E4%BA%A7%E6%95%88%E7%8E%87%E4%B8%8E%E7%94%A8%E6%88%B7%E4%BD%93%E9%AA%8C"><span class="toc-number">3.5.</span> <span class="toc-text">提高生产效率与用户体验</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%AE%E8%B0%83%E6%B6%89%E5%8F%8A%E7%9A%84%E5%85%B3%E9%94%AE%E7%9F%A5%E8%AF%86%E7%82%B9"><span class="toc-number">4.</span> <span class="toc-text">微调涉及的关键知识点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E8%AE%BA"><span class="toc-number">5.</span> <span class="toc-text">结论</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/cfbb0de9/" title="Oracle ORA-01653 错误分析与表空间扩容解决方案">Oracle ORA-01653 错误分析与表空间扩容解决方案</a><time datetime="2025-09-10T02:38:00.000Z" title="发表于 2025年09月10日 10:38:00">2025年09月10日</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/939682c5/" title="大模型微调方法全解析">大模型微调方法全解析</a><time datetime="2025-09-06T02:29:00.000Z" title="发表于 2025年09月06日 10:29:00">2025年09月06日</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/ee28a247/" title="为什么要对大模型进行微调？">为什么要对大模型进行微调？</a><time datetime="2025-09-06T02:29:00.000Z" title="发表于 2025年09月06日 10:29:00">2025年09月06日</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/c46a774/" title="微调中的数据收集与准备">微调中的数据收集与准备</a><time datetime="2025-09-06T02:29:00.000Z" title="发表于 2025年09月06日 10:29:00">2025年09月06日</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/3c950e28/" title="Nginx 四层与七层转发详解及应用场景">Nginx 四层与七层转发详解及应用场景</a><time datetime="2025-08-27T05:19:00.000Z" title="发表于 2025年08月27日 13:19:00">2025年08月27日</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2013 - 2025 By Jiang Dequan</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.0-b1</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/node-snackbar/0.1.16/snackbar.min.js"></script><div class="js-pjax"><script>(() => {
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = `%%{init:{ 'theme':'${theme}'}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.9.0/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const initValine = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyValine = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const valineConfig = {
+      el: '#vcomment',
+      appId: '4ig8HD4BU3Jdup2Ksnp5Co4o-gzGzoHsz',
+      appKey: '7wRc8g1GiVE4P97KAAOZxDte',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      visitor: false,
+      ...option,
+      path: isShuoshuo ? path : (option && option.path) || window.location.pathname
+    }
+
+    new Valine(valineConfig)
+  }
+
+  const loadValine = async (el, path) => {
+    if (typeof Valine === 'function') {
+      initValine(el, path)
+    } else {
+      await btf.getScript('https://cdnjs.cloudflare.com/ajax/libs/valine/1.5.3/Valine.min.js')
+      initValine(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Valine' === 'Valine'
+      ? window.shuoshuoComment = { loadComment: loadValine }
+      : window.loadOtherComment = loadValine
+    return
+  }
+
+  if ('Valine' === 'Valine' || !true) {
+    if (true) btf.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
